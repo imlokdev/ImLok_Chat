@@ -6,11 +6,22 @@ using UnityEngine.Networking;
 public class MySQLConnection : MonoBehaviour
 {
     public static MySQLConnection instance;
-    private readonly string apiUrl = "http://127.0.0.1:5000/";
+    string apiUrl;
+
+    readonly string localURL = "http://127.0.0.1:5000/", 
+        vercelURL = "https://api-my-sql.vercel.app/";
+
+    [SerializeField] bool localAPI;
 
     private void Awake()
     {
         if (instance == null) instance = this;
+    }
+
+    private void Update()
+    {
+        if (localAPI) apiUrl = localURL;
+        else apiUrl = vercelURL;
     }
 
     public void CreateAccount(string nome, string email, string password, Text feedback, CreateAccManager script)
@@ -22,6 +33,39 @@ public class MySQLConnection : MonoBehaviour
     public void CountAcc(PainelAdminScript script) => StartCoroutine(GetCountAcc(script));
     
     public void SelectAccs(PainelAdminScript script, int v1, int v2) => StartCoroutine(GetSelectAccs(script, v1, v2));
+
+    public void BlockAcc(PainelAdminScript script, Button button, string id, bool state) => StartCoroutine(SetBlockAcc(script, button, id, state));
+
+    IEnumerator SetBlockAcc(PainelAdminScript script, Button button, string id, bool state)
+    {
+        string data = $"{id},{state}";
+        byte[] dataToSend = new System.Text.UTF8Encoding().GetBytes(data);
+
+        UnityWebRequest request = new(apiUrl + "blockaccount", "POST")
+        {
+            uploadHandler = new UploadHandlerRaw(dataToSend),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+
+        request.SetRequestHeader("Content-Type", "text/plain");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Erro: " + request.error);
+            print("Algo deu errado na tentavida de bloquear/desbloquear a conta.");
+        }
+        else
+        {
+            Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
+            print("Bloqueio/desbloqueio feito com sucesso.");
+
+            script.Atualizar();
+        }
+
+        button.interactable = true;
+    }
 
     IEnumerator GetCountAcc(PainelAdminScript script)
     {
@@ -51,12 +95,7 @@ public class MySQLConnection : MonoBehaviour
             Debug.LogError("Erro: " + request.error);
             Debug.LogError("Nenhuma conta encontrada.");
         }
-        else
-        {
-            var resultado = request.downloadHandler.text;
-            Debug.Log("Resposta do servidor: " + resultado);
-            script.SetContas(resultado);
-        }
+        else script.SetContas(request.downloadHandler.text);
     }
 
     IEnumerator PostAndGetInfos(string login, string password, Text feedback, LoginManager script)
@@ -86,13 +125,13 @@ public class MySQLConnection : MonoBehaviour
             Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
             feedback.text = "Login feito com sucesso.";
             feedback.color = Color.green;
-            script.ChangeTela();
 
             string[] infos = GetInfos(request.downloadHandler.text);
             for (int i = 0; i < infos.Length; i++) infos[i] = infos[i].Trim();
 
             int count = 0;
             AccountManager.instance.SetInfos(int.Parse(infos[count++]), infos[count++], infos[count++], infos[count++] == "1", infos[count++] == "1", System.DateTime.Parse(infos[++count]));
+            script.ChangeTela();
         }
     }
 
@@ -152,36 +191,6 @@ public class MySQLConnection : MonoBehaviour
         callback(request);
     }
 
-    IEnumerator PostData(string nome, int idade, string nacionalidade, char sexo)
-    {
-        // Criar o objeto JSON
-        string jsonData = $"{{\"nome\":\"{nome}\",\"idade\":{idade},\"nacionalidade\":{nacionalidade},\"sexo\":{sexo}}}";
-
-        // Converter a string JSON para bytes
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
-
-        // Criar a requisição POST
-        UnityWebRequest request = new(apiUrl + "dados", "POST")
-        {
-            uploadHandler = new UploadHandlerRaw(jsonToSend),
-            downloadHandler = new DownloadHandlerBuffer()
-        };
-
-        // Configurar o cabeçalho para JSON
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError("Erro: " + request.error);
-        }
-        else
-        {
-            Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
-        }
-    }
-
     private string[] GetInfos(string infos)
     {
         var temp = infos.Replace("\"", "");
@@ -201,40 +210,4 @@ public class MySQLConnection : MonoBehaviour
 
         return int.Parse(temp);
     }
-
-    //IEnumerator GetDataID(int id)
-    //{
-    //    UnityWebRequest request = UnityWebRequest.Get(apiUrl+$"dados/{id}");
-    //    yield return request.SendWebRequest();
-
-    //    if (request.result != UnityWebRequest.Result.Success)
-    //    {
-    //        Debug.LogError(request.error);
-    //    }
-    //    else
-    //    {
-    //        Debug.Log(request.downloadHandler.text);
-    //    }
-    //}
-
-    //IEnumerator GetData()
-    //{
-    //    UnityWebRequest request = UnityWebRequest.Get(apiUrl + "dados");
-    //    yield return request.SendWebRequest();
-
-    //    if (request.result != UnityWebRequest.Result.Success)
-    //    {
-    //        Debug.LogError(request.error);
-    //    }
-    //    else
-    //    {
-    //        Debug.Log(request.downloadHandler.text);
-    //    }
-    //}
-
-    //public void Get_Account(string login) => StartCoroutine(GetAccount(login));
-
-    //public void Get_DataID(int id) => StartCoroutine(GetDataID(id));
-
-    //public void GetAccounts() => StartCoroutine(GetData());
 }

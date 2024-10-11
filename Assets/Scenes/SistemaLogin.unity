@@ -768,7 +768,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &169724793
 RectTransform:
   m_ObjectHideFlags: 0
@@ -809,6 +809,7 @@ MonoBehaviour:
   passwordInput: {fileID: 57258033}
   feedback: {fileID: 586715342}
   infosTela: {fileID: 1803875105}
+  painelAdmin: {fileID: 591716271}
 --- !u!1 &175188782
 GameObject:
   m_ObjectHideFlags: 0
@@ -1488,7 +1489,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &414211211
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1958,7 +1959,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &591716272
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1977,7 +1978,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -499}
+  m_AnchoredPosition: {x: 0, y: -430}
   m_SizeDelta: {x: 292.89, y: 45.64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &591716273
@@ -5520,7 +5521,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1481516227
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6719,12 +6720,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa50e0712fd2fbb478528f1eb0169e51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 0
-  Login: 
-  Email: 
-  IsBlocked: 0
-  IsAdmin: 0
-  painelAdmin: {fileID: 0}
+  painelAdmin: {fileID: 1481516226}
+  login: {fileID: 169724792}
   feedback: {fileID: 586715342}
   informacoes: {fileID: 1649314492}
   sairBtn: {fileID: 414211212}

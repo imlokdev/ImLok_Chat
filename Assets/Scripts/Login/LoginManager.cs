@@ -7,7 +7,7 @@ public class LoginManager : MonoBehaviour
 
     [SerializeField] InputField nicknameInput, passwordInput;
     [SerializeField] Text feedback;
-    [SerializeField] GameObject infosTela;
+    [SerializeField] GameObject infosTela, painelAdmin;
 
     private void Start() => conn = MySQLConnection.instance;
 
@@ -23,5 +23,6 @@ public class LoginManager : MonoBehaviour
     {
         gameObject.SetActive(false);
         infosTela.SetActive(true);
+        painelAdmin.SetActive(AccountManager.instance.IsAdmin);
     }
 }

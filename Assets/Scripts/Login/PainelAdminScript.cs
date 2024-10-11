@@ -1,11 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Leguar.TotalJSON;
-using System.Reflection;
 using UnityEngine.EventSystems;
+
+using Leguar.TotalJSON;
 
 public class PainelAdminScript : MonoBehaviour
 {
@@ -17,13 +14,14 @@ public class PainelAdminScript : MonoBehaviour
 
     Conta[] contas;
 
-    public int accCount, accCountDisplay, firstID = 4, lastID;
+    public int accCountDisplay, firstID = 4, lastID;
     int page, totalPages;
 
     private void Awake() => accCountDisplay = accounts.childCount;
 
     private void Start()
     {
+        print($"Start PainelAdminScript.");
         conn = MySQLConnection.instance;
         conn.CountAcc(this);
         lastID = firstID;
@@ -39,10 +37,11 @@ public class PainelAdminScript : MonoBehaviour
 
     public void SetCount(int count)
     {
-        accCount = count;
+        var temp = SetBackup(count, contas);
+        contas = temp;
         page = 1;
 
-        totalPages = (accCount + accCountDisplay - 1) / accCountDisplay;
+        totalPages = (count + accCountDisplay - 1) / accCountDisplay;
         paginasCount.text = $"1/{totalPages}";
 
         conn.SelectAccs(this, lastID, lastID + 3);
@@ -55,7 +54,14 @@ public class PainelAdminScript : MonoBehaviour
         lastID += 4;
         for (int i = 0; i < accounts.childCount; i++)
             accounts.GetChild(i).gameObject.SetActive(false);
-        conn.SelectAccs(this, lastID, lastID + 3);
+
+        if (contas[lastID - firstID] == null) conn.SelectAccs(this, lastID, lastID + 3);
+        else
+        {
+            int temp = 0;
+            for (int i = lastID - firstID; temp < 4 && i < contas.Length; i++)
+                SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin);
+        } 
     }
     public void Anterior()
     {
@@ -63,28 +69,49 @@ public class PainelAdminScript : MonoBehaviour
         lastID -= 4;
         for (int i = 0; i < accounts.childCount; i++)
             accounts.GetChild(i).gameObject.SetActive(false);
-        conn.SelectAccs(this, lastID, lastID + 3);
+
+        int temp = 0;
+        for (int i = lastID - firstID; temp < 4; i++)
+            SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin);
     }
-    // Criar botao atualizar infos
+
+    public void Atualizar()
+    {
+        for (int i = 0; i < accounts.childCount; i++)
+            accounts.GetChild(i).gameObject.SetActive(false);
+        conn.CountAcc(this);
+    }
+
     public void BlockBtn(Text idText)
     {
-        GameObject clickedButton = EventSystem.current.currentSelectedGameObject;
-        print(idText.text);
+        Button clickedButton = EventSystem.current.currentSelectedGameObject.GetComponent<Button>();
 
         switch (clickedButton.tag)
         {
-            // Inciar connexao MySQL com o id
-            case "Bloquear": clickedButton.tag = "Desbloquear"; break;
-            case "Desbloquear": clickedButton.tag = "Bloquear"; break;
+            case "Bloquear": conn.BlockAcc(this, clickedButton, idText.text, true); ; break;
+            case "Desbloquear": conn.BlockAcc(this, clickedButton, idText.text, false); break;
+        }
+
+        clickedButton.interactable = false;
+    }
+
+    public void BlockBtnsLista(bool activate)
+    {
+        if (activate)
+        {
+
+        }
+        else
+        {
+
         }
     }
 
     public void SetContas(string result)
     {
         JSON[] json = JSON.ParseStringToMultiple(Api2Json(result));
-        contas = new Conta[json.Length];
 
-        for (int i = 0; i < contas.Length; i++)
+        for (int i = 0; i < json.Length; i++)
         {
             int id = json[i].GetInt("id");
             string user = json[i].GetString("login"),
@@ -92,8 +119,8 @@ public class PainelAdminScript : MonoBehaviour
             bool isBlocked = json[i].GetInt("isBlocked") == 1,
                  isAdmin = json[i].GetInt("isAdmin") == 1;
 
-            contas[i] = new(id, user, email, isBlocked, isAdmin);
-            SetContaTela(i, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin);
+            contas[id - 4] = new(id, user, email, isBlocked, isAdmin);
+            SetContaTela(i, contas[id - 4].ID, contas[id - 4].User, contas[id - 4].Email, contas[id - 4].IsBlocked, contas[id - 4].IsAdmin);
         }
     }
 
@@ -175,5 +202,14 @@ public class PainelAdminScript : MonoBehaviour
             proximoBtn.SetActive(false);
             anteriorBtn.SetActive(false);
         }
+    }
+
+    private Conta[] SetBackup(int lenght, Conta[] backup)
+    {
+        Conta[] temp = new Conta[lenght];
+        if (backup != null)
+            for (int i = 0; i < lenght; i++)
+                temp[i] = backup[i];
+        return temp;
     }
 }

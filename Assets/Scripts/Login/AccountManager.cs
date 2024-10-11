@@ -6,14 +6,14 @@ public class AccountManager : MonoBehaviour
 {
     public static AccountManager instance;
 
-    public int id;
-    public string Login; //{ get; private set; }
-    public string Email;//{ get; private set; }
-    public bool IsBlocked; //{ get; private set; }
-    public bool IsAdmin; //{ get; private set; }
-    public DateTime Created_at;
+    public int ID { get; private set; }
+    public string Login { get; private set; }
+    public string Email { get; private set; }
+    public bool IsBlocked { get; private set; }
+    public bool IsAdmin { get; private set; }
+    public DateTime Created_at { get; private set; }
 
-    [SerializeField] GameObject painelAdmin;
+    [SerializeField] GameObject painelAdmin, login;
     [SerializeField] Text feedback, informacoes;
     [SerializeField] Button sairBtn;
 
@@ -25,14 +25,9 @@ public class AccountManager : MonoBehaviour
             transform.GetChild(i).gameObject.SetActive(true);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyUp(KeyCode.Return)) print(Created_at);
-    }
-
     public void SetInfos(int _id, string _login, string _email, bool _isBlocked, bool _isAdmin, DateTime _created_at)
     {
-        id = _id;
+        ID = _id;
         Login = _login;
         Email = _email;
         IsBlocked = _isBlocked;
@@ -48,7 +43,7 @@ public class AccountManager : MonoBehaviour
         {
             string text = "";
 
-            text += $"id: {id}\n\n";
+            text += $"id: {ID}\n\n";
             text += $"Login: {Login}\n\n";
             text += $"Email: {Email}\n\n";
             text += $"Sua conta foi criada há {(DateTime.Today - Created_at).Days} dias.\n\n";
@@ -63,12 +58,15 @@ public class AccountManager : MonoBehaviour
 
     public void SairButton()
     {
-
+        gameObject.SetActive(false);
+        login.SetActive(true);
+        feedback.text = null;
     }
 
     public void PainelAdmin()
     {
         gameObject.SetActive(false);
         painelAdmin.SetActive(true);
+        feedback.text = null;
     }
 }

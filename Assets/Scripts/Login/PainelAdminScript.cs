@@ -14,14 +14,13 @@ public class PainelAdminScript : MonoBehaviour
 
     Conta[] contas;
 
-    public int accCountDisplay, firstID = 4, lastID;
-    int page, totalPages;
+    readonly int firstID = 1;
+    int accCountDisplay, lastID, page, totalPages;
 
     private void Awake() => accCountDisplay = accounts.childCount;
 
     private void Start()
     {
-        print($"Start PainelAdminScript.");
         conn = MySQLConnection.instance;
         conn.CountAcc(this);
         lastID = firstID;
@@ -114,13 +113,14 @@ public class PainelAdminScript : MonoBehaviour
         for (int i = 0; i < json.Length; i++)
         {
             int id = json[i].GetInt("id");
-            string user = json[i].GetString("login"),
+            string user = json[i].GetString("user"),
                    email = json[i].GetString("email");
             bool isBlocked = json[i].GetInt("isBlocked") == 1,
-                 isAdmin = json[i].GetInt("isAdmin") == 1;
+                 isAdmin = json[i].GetInt("isAdmin") == 1,
+                 isBanned = json[i].GetInt("isBanned") == 1;
 
-            contas[id - 4] = new(id, user, email, isBlocked, isAdmin);
-            SetContaTela(i, contas[id - 4].ID, contas[id - 4].User, contas[id - 4].Email, contas[id - 4].IsBlocked, contas[id - 4].IsAdmin);
+            contas[id - 1] = new(id, user, email, isBlocked, isAdmin, isBanned);
+            SetContaTela(i, contas[id - 1].ID, contas[id - 1].User, contas[id - 1].Email, contas[id - 1].IsBlocked, contas[id - 1].IsAdmin);
         }
     }
 

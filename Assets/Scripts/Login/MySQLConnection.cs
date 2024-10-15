@@ -1,7 +1,12 @@
+using System;
 using System.Collections;
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+
+using Leguar.TotalJSON;
+using System.Collections.Generic;
 
 public class MySQLConnection : MonoBehaviour
 {
@@ -25,7 +30,7 @@ public class MySQLConnection : MonoBehaviour
     }
 
     public void CreateAccount(string nome, string email, string password, Text feedback, CreateAccManager script)
-    => StartCoroutine(PostAndGetAccount(nome, email, password, feedback, script));
+    => StartCoroutine(PostAccount(nome, email, password, feedback, script));
 
     public void LoginAccount(string login, string password, Text feedback, LoginManager script)
     => StartCoroutine(PostAndGetInfos(login, password, feedback, script));
@@ -65,6 +70,8 @@ public class MySQLConnection : MonoBehaviour
         }
 
         button.interactable = true;
+
+        request.Dispose();
     }
 
     IEnumerator GetCountAcc(PainelAdminScript script)
@@ -83,26 +90,33 @@ public class MySQLConnection : MonoBehaviour
             Debug.Log("Resposta do servidor: " + resultado);
             script.SetCount(GetCount(resultado));
         }
+
+        request.Dispose();
     }
 
     IEnumerator GetSelectAccs(PainelAdminScript script, int v1, int v2)
     {
+        print($"V1: {v1}, V2: {v2}");
         UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"getselectacc?v1={v1}&v2={v2}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError("Erro: " + request.error);
-            Debug.LogError("Nenhuma conta encontrada.");
-        }
+            Debug.LogError("Erro: " + request.downloadHandler.text);
         else script.SetContas(request.downloadHandler.text);
+
+        request.Dispose();
     }
 
-    IEnumerator PostAndGetInfos(string login, string password, Text feedback, LoginManager script)
+    IEnumerator PostAndGetInfos(string user, string password, Text feedback, LoginManager script)
     {
         feedback.text = null;
-        string jsonData = $"{{\"login\":\"{login}\",\"password\":{password}}}";
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
+        IDictionary dicio = new Dictionary<string, string>
+        {
+            { "user", user },
+            { "password", password }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
 
         UnityWebRequest request = new(apiUrl + "loginacc", "POST")
         {
@@ -117,12 +131,11 @@ public class MySQLConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.error);
-            feedback.text = "Usuário e/ou senha incorreto.";
+            feedback.text = request.downloadHandler.text;
             feedback.color = Color.red;
         }
         else
         {
-            Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
             feedback.text = "Login feito com sucesso.";
             feedback.color = Color.green;
 
@@ -130,33 +143,34 @@ public class MySQLConnection : MonoBehaviour
             for (int i = 0; i < infos.Length; i++) infos[i] = infos[i].Trim();
 
             int count = 0;
-            AccountManager.instance.SetInfos(int.Parse(infos[count++]), infos[count++], infos[count++], infos[count++] == "1", infos[count++] == "1", System.DateTime.Parse(infos[++count]));
+            int id = int.Parse(infos[count++]);
+            string _user = infos[++count],
+                   email = infos[++count];
+            bool isBlocked = infos[++count] == "1",
+                 isAdmin = infos[++count] == "1",
+                 isBanned = infos[++count] == "1";
+            DateTime created_at = DateTime.Parse(infos[++count+1]);
+            bool lastLoginSuccess = DateTime.TryParse(infos[^1], out DateTime lastLoginDate);
+            AccountManager.instance.SetInfos(
+                id, _user, email, isBlocked, isAdmin, isBanned, created_at, 
+                lastLoginSuccess ? lastLoginDate : DateTime.MinValue);
             script.ChangeTela();
         }
-    }
 
-    IEnumerator PostAndGetAccount(string nome, string email, string password, Text feedback, CreateAccManager script)
-    {
-        feedback.text = null;
-        string jsonData = $"{{\"login\":\"{nome}\",\"email\":{email},\"password\":{password}}}";
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
-
-        yield return StartCoroutine(GetAccount(nome, _request =>
-        {
-            if (_request.result != UnityWebRequest.Result.Success)
-            {
-                feedback.text = "Já existe uma conta criada com este usuário.";
-                feedback.color = Color.red;
-            }
-            else StartCoroutine(PostAccount(nome, email, password, feedback, script));
-        }));
+        request.Dispose();
     }
 
     IEnumerator PostAccount(string nome, string email, string password, Text feedback, CreateAccManager script)
     {
         feedback.text = null;
-        string jsonData = $"{{\"login\":\"{nome}\",\"email\":{email},\"password\":{password}}}";
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
+        IDictionary dicio = new Dictionary<string, string>
+        {
+            { "user", nome },
+            { "email", email },
+            { "password", password }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
 
         UnityWebRequest request = new(apiUrl + "createacc", "POST")
         {
@@ -171,7 +185,7 @@ public class MySQLConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.error);
-            feedback.text = "Houve um erro ao criar sua conta.";
+            feedback.text = request.downloadHandler.text;
             feedback.color = Color.red;
         }
         else
@@ -181,14 +195,8 @@ public class MySQLConnection : MonoBehaviour
             feedback.color = Color.green;
             script.ChangeTela();
         }
-    }
 
-    IEnumerator GetAccount(string login, System.Action<UnityWebRequest> callback)
-    {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"getaccount/{login}");
-        yield return request.SendWebRequest();
-
-        callback(request);
+        request.Dispose();
     }
 
     private string[] GetInfos(string infos)

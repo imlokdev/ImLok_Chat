@@ -55,7 +55,7 @@ public class PainelAdminScript : MonoBehaviour
         {
             int temp = 0;
             for (int i = lastID - firstID; temp < 4 && i < contas.Length; i++)
-                SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin, contas[i].IsBanned);
+                SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin, contas[i].IsBanned, contas[i].IsConfirmed);
         } 
     }
 
@@ -68,7 +68,7 @@ public class PainelAdminScript : MonoBehaviour
 
         int temp = 0;
         for (int i = lastID - firstID; temp < 4; i++)
-            SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin, contas[i].IsBanned);
+            SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin, contas[i].IsBanned, contas[i].IsConfirmed);
     }
 
     public void Atualizar()
@@ -98,6 +98,16 @@ public class PainelAdminScript : MonoBehaviour
         clickedButton.interactable = false;
     }
 
+    public void ResentEmailBtn()
+    {
+        Button clickedButton = EventSystem.current.currentSelectedGameObject.GetComponent<Button>();
+        Text idText = clickedButton.transform.parent.GetChild(0).GetComponent<Text>();
+
+        conn.ResentEmailAcc(this, clickedButton, idText.text);
+
+        clickedButton.interactable = false;
+    }
+
     public void SetContas(string result)
     {
         JSON[] json = JSON.ParseStringToMultiple(Api2Json(result));
@@ -115,7 +125,7 @@ public class PainelAdminScript : MonoBehaviour
             DateTime.TryParse(json[i].GetString("last_login"), out DateTime lastLoginDate);
             
             Conta conta = new(id, user, email, isBlocked, isAdmin, isBanned, isConfirmed, created_at, lastLoginDate);
-            SetContaTela(i, conta.ID, conta.User, conta.Email, conta.IsBlocked, conta.IsAdmin, conta.IsBanned);
+            SetContaTela(i, conta.ID, conta.User, conta.Email, conta.IsBlocked, conta.IsAdmin, conta.IsBanned, conta.IsConfirmed);
             contas[id - 1] = conta;
         }
     }
@@ -143,7 +153,7 @@ public class PainelAdminScript : MonoBehaviour
          return temp;
     }
 
-    private void SetContaTela(int index, int id, string user, string email, bool isBlocked, bool isAdmin, bool isBanned)
+    private void SetContaTela(int index, int id, string user, string email, bool isBlocked, bool isAdmin, bool isBanned, bool isConfirmed)
     {
         Transform filho = accounts.GetChild(index);
         int temp = 0;
@@ -197,7 +207,8 @@ public class PainelAdminScript : MonoBehaviour
         }
 
         // Set Button resent email
-        
+        if (isConfirmed) filho.GetChild(temp).GetComponent<Button>().interactable = false;
+        else filho.GetChild(temp).GetComponent<Button>().interactable = true;
 
         filho.gameObject.SetActive(true);
     }

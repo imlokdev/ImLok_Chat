@@ -42,6 +42,28 @@ public class MySQLConnection : MonoBehaviour
     public void BlockAcc(PainelAdminScript script, Button button, string id, string state) => StartCoroutine(SetBlockAcc(script, button, id, state));
 
     public void BanAcc(PainelAdminScript script, Button button, string id, string state) => StartCoroutine(SetBanAcc(script, button, id, state));
+    public void ResentEmailAcc(PainelAdminScript script, Button button, string id) => StartCoroutine(ResentEmail(script, button, id));
+
+    IEnumerator ResentEmail(PainelAdminScript script, Button button, string id)
+    {
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"resent/{id}");
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Erro: " + request.error);
+            Debug.LogError("Conta inválida.");
+        }
+        else
+        {
+            var resultado = request.downloadHandler.text;
+            Debug.Log("Resposta do servidor: " + resultado);
+            button.interactable = true;
+            script.Atualizar();
+        }
+
+        request.Dispose();
+    }
 
     IEnumerator SetBanAcc(PainelAdminScript script, Button button, string id, string state)
     {
@@ -121,7 +143,7 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator GetCountAcc(PainelAdminScript script)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"count");
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + "count");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)

@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,7 @@ public class LoginManager : MonoBehaviour
 
     [SerializeField] InputField nicknameInput, passwordInput;
     [SerializeField] Text feedback;
-    [SerializeField] GameObject infosTela, painelAdmin;
+    [SerializeField] GameObject infosTela, painelAdmin, criarConta;
 
     private void Start() => conn = MySQLConnection.instance;
 
@@ -23,6 +24,13 @@ public class LoginManager : MonoBehaviour
     {
         gameObject.SetActive(false);
         infosTela.SetActive(true);
-        painelAdmin.SetActive(AccountManager.instance.IsAdmin);
+        painelAdmin.SetActive(AccountManager.instance.Conta.IsAdmin);
+    }
+
+
+    public void CriarConta()
+    {
+        gameObject.SetActive(false);
+        criarConta.SetActive(true);
     }
 }

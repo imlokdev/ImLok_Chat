@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Bloquear
   - Desbloquear
+  - 1
+  - 0
   layers:
   - Default
   - TransparentFX

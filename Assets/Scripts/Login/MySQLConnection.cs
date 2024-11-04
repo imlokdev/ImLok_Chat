@@ -39,20 +39,65 @@ public class MySQLConnection : MonoBehaviour
     
     public void SelectAccs(PainelAdminScript script, int v1, int v2) => StartCoroutine(GetSelectAccs(script, v1, v2));
 
-    public void BlockAcc(PainelAdminScript script, Button button, string id, bool state) => StartCoroutine(SetBlockAcc(script, button, id, state));
+    public void BlockAcc(PainelAdminScript script, Button button, string id, string state) => StartCoroutine(SetBlockAcc(script, button, id, state));
 
-    IEnumerator SetBlockAcc(PainelAdminScript script, Button button, string id, bool state)
+    public void BanAcc(PainelAdminScript script, Button button, string id, string state) => StartCoroutine(SetBanAcc(script, button, id, state));
+
+    IEnumerator SetBanAcc(PainelAdminScript script, Button button, string id, string state)
     {
-        string data = $"{id},{state}";
-        byte[] dataToSend = new System.Text.UTF8Encoding().GetBytes(data);
-
-        UnityWebRequest request = new(apiUrl + "blockaccount", "POST")
+        IDictionary dicio = new Dictionary<string, string>
         {
-            uploadHandler = new UploadHandlerRaw(dataToSend),
+            { "id", id },
+            { "state", state }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
+
+        UnityWebRequest request = new(apiUrl + "ban", "PUT")
+        {
+            uploadHandler = new UploadHandlerRaw(jsonToSend),
             downloadHandler = new DownloadHandlerBuffer()
         };
 
-        request.SetRequestHeader("Content-Type", "text/plain");
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Erro: " + request.error);
+            print("Algo deu errado na tentavida de banir/desbanir a conta.");
+        }
+        else
+        {
+            Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
+            print("banimento/desbanimento feito com sucesso.");
+
+            script.Atualizar();
+        }
+
+        button.interactable = true;
+
+        request.Dispose();
+    }
+
+    IEnumerator SetBlockAcc(PainelAdminScript script, Button button, string id, string state)
+    {
+        IDictionary dicio = new Dictionary<string, string>
+        {
+            { "id", id },
+            { "state", state }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
+
+        UnityWebRequest request = new(apiUrl + "block", "PUT")
+        {
+            uploadHandler = new UploadHandlerRaw(jsonToSend),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+
+        request.SetRequestHeader("Content-Type", "application/json");
 
         yield return request.SendWebRequest();
 
@@ -76,7 +121,7 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator GetCountAcc(PainelAdminScript script)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"getcountacc");
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"count");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -96,8 +141,7 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator GetSelectAccs(PainelAdminScript script, int v1, int v2)
     {
-        print($"V1: {v1}, V2: {v2}");
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"getselectacc?v1={v1}&v2={v2}");
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"select?v1={v1}&v2={v2}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -118,7 +162,7 @@ public class MySQLConnection : MonoBehaviour
         JSON json = new(dicio);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
 
-        UnityWebRequest request = new(apiUrl + "loginacc", "POST")
+        UnityWebRequest request = new(apiUrl + "login", "POST")
         {
             uploadHandler = new UploadHandlerRaw(jsonToSend),
             downloadHandler = new DownloadHandlerBuffer()
@@ -139,21 +183,22 @@ public class MySQLConnection : MonoBehaviour
             feedback.text = "Login feito com sucesso.";
             feedback.color = Color.green;
 
-            string[] infos = GetInfos(request.downloadHandler.text);
-            for (int i = 0; i < infos.Length; i++) infos[i] = infos[i].Trim();
+            JSON jsoninfo = JSON.ParseString(request.downloadHandler.text);
+            DateTime.TryParse(jsoninfo.GetString("last_login"), out DateTime lastLoginDate);
 
-            int count = 0;
-            int id = int.Parse(infos[count++]);
-            string _user = infos[++count],
-                   email = infos[++count];
-            bool isBlocked = infos[++count] == "1",
-                 isAdmin = infos[++count] == "1",
-                 isBanned = infos[++count] == "1";
-            DateTime created_at = DateTime.Parse(infos[++count+1]);
-            bool lastLoginSuccess = DateTime.TryParse(infos[^1], out DateTime lastLoginDate);
-            AccountManager.instance.SetInfos(
-                id, _user, email, isBlocked, isAdmin, isBanned, created_at, 
-                lastLoginSuccess ? lastLoginDate : DateTime.MinValue);
+            Conta conta = new(
+                jsoninfo.GetInt("id"),
+                jsoninfo.GetString("user"),
+                jsoninfo.GetString("email"),
+                jsoninfo.GetInt("isBlocked") == 1,
+                jsoninfo.GetInt("isAdmin") == 1,
+                jsoninfo.GetInt("isBanned") == 1,
+                jsoninfo.GetInt("isConfirmed") == 1,
+                DateTime.Parse(jsoninfo.GetString("created_at")),
+                lastLoginDate
+                );
+                   
+            AccountManager.instance.SetInfos(conta);
             script.ChangeTela();
         }
 
@@ -172,7 +217,7 @@ public class MySQLConnection : MonoBehaviour
         JSON json = new(dicio);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
 
-        UnityWebRequest request = new(apiUrl + "createacc", "POST")
+        UnityWebRequest request = new(apiUrl + "register", "POST")
         {
             uploadHandler = new UploadHandlerRaw(jsonToSend),
             downloadHandler = new DownloadHandlerBuffer()
@@ -197,15 +242,6 @@ public class MySQLConnection : MonoBehaviour
         }
 
         request.Dispose();
-    }
-
-    private string[] GetInfos(string infos)
-    {
-        var temp = infos.Replace("\"", "");
-        temp = temp[(temp.IndexOf("[")+1)..];
-        temp = temp[..temp.IndexOf("]")];
-
-        return temp.Split(',');
     }
 
     private int GetCount(string count)

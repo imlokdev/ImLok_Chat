@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 using Leguar.TotalJSON;
+using System;
 
 public class PainelAdminScript : MonoBehaviour
 {
@@ -36,17 +37,12 @@ public class PainelAdminScript : MonoBehaviour
 
     public void SetCount(int count)
     {
-        var temp = SetBackup(count, contas);
-        contas = temp;
-        page = 1;
-
+        contas = SetBackup(count, contas);
+        if (page == 0) page = 1;
         totalPages = (count + accCountDisplay - 1) / accCountDisplay;
-        paginasCount.text = $"1/{totalPages}";
-
         conn.SelectAccs(this, lastID, lastID + 3);
     }
 
-    // Falta uma forma de bloquear multiplos cliques, antes de realmente atualizar
     public void Proximo()
     {
         page++;
@@ -59,9 +55,10 @@ public class PainelAdminScript : MonoBehaviour
         {
             int temp = 0;
             for (int i = lastID - firstID; temp < 4 && i < contas.Length; i++)
-                SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin);
+                SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin, contas[i].IsBanned);
         } 
     }
+
     public void Anterior()
     {
         page--;
@@ -71,7 +68,7 @@ public class PainelAdminScript : MonoBehaviour
 
         int temp = 0;
         for (int i = lastID - firstID; temp < 4; i++)
-            SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin);
+            SetContaTela(temp++, contas[i].ID, contas[i].User, contas[i].Email, contas[i].IsBlocked, contas[i].IsAdmin, contas[i].IsBanned);
     }
 
     public void Atualizar()
@@ -81,29 +78,24 @@ public class PainelAdminScript : MonoBehaviour
         conn.CountAcc(this);
     }
 
-    public void BlockBtn(Text idText)
+    public void BlockBtn()
     {
         Button clickedButton = EventSystem.current.currentSelectedGameObject.GetComponent<Button>();
+        Text idText = clickedButton.transform.parent.GetChild(0).GetComponent<Text>();
 
-        switch (clickedButton.tag)
-        {
-            case "Bloquear": conn.BlockAcc(this, clickedButton, idText.text, true); ; break;
-            case "Desbloquear": conn.BlockAcc(this, clickedButton, idText.text, false); break;
-        }
+        conn.BlockAcc(this, clickedButton, idText.text, clickedButton.tag);
 
         clickedButton.interactable = false;
     }
 
-    public void BlockBtnsLista(bool activate)
+    public void BanBtn()
     {
-        if (activate)
-        {
+        Button clickedButton = EventSystem.current.currentSelectedGameObject.GetComponent<Button>();
+        Text idText = clickedButton.transform.parent.GetChild(0).GetComponent<Text>();
 
-        }
-        else
-        {
+        conn.BanAcc(this, clickedButton, idText.text, clickedButton.tag);
 
-        }
+        clickedButton.interactable = false;
     }
 
     public void SetContas(string result)
@@ -117,10 +109,14 @@ public class PainelAdminScript : MonoBehaviour
                    email = json[i].GetString("email");
             bool isBlocked = json[i].GetInt("isBlocked") == 1,
                  isAdmin = json[i].GetInt("isAdmin") == 1,
-                 isBanned = json[i].GetInt("isBanned") == 1;
-
-            contas[id - 1] = new(id, user, email, isBlocked, isAdmin, isBanned);
-            SetContaTela(i, contas[id - 1].ID, contas[id - 1].User, contas[id - 1].Email, contas[id - 1].IsBlocked, contas[id - 1].IsAdmin);
+                 isBanned = json[i].GetInt("isBanned") == 1,
+                 isConfirmed = json[i].GetInt("isConfirmed") == 1;
+            DateTime created_at = DateTime.Parse(json[i].GetString("created_at"));
+            DateTime.TryParse(json[i].GetString("last_login"), out DateTime lastLoginDate);
+            
+            Conta conta = new(id, user, email, isBlocked, isAdmin, isBanned, isConfirmed, created_at, lastLoginDate);
+            SetContaTela(i, conta.ID, conta.User, conta.Email, conta.IsBlocked, conta.IsAdmin, conta.IsBanned);
+            contas[id - 1] = conta;
         }
     }
 
@@ -147,7 +143,7 @@ public class PainelAdminScript : MonoBehaviour
          return temp;
     }
 
-    private void SetContaTela(int index, int id, string user, string email, bool isBlocked, bool isAdmin)
+    private void SetContaTela(int index, int id, string user, string email, bool isBlocked, bool isAdmin, bool isBanned)
     {
         Transform filho = accounts.GetChild(index);
         int temp = 0;
@@ -159,29 +155,57 @@ public class PainelAdminScript : MonoBehaviour
         else filho.GetChild(temp++).GetComponent<Text>().text = Tools.ColorirTextoHtml(user, user, Color.green);
         // Set Email
         filho.GetChild(temp++).GetComponent<Text>().text = email;
+
         // Set Button block
+        if (id == AccountManager.instance.Conta.ID) filho.GetChild(temp++).GetComponent<Button>().interactable = false;
+        else
         {
+            filho.GetChild(temp).GetComponent<Button>().interactable = true;
             if (isBlocked)
             {
-                string a = "Desbloquear";
-                filho.GetChild(temp).GetComponentInChildren<Text>().text = a;
-                filho.GetChild(temp).tag = a;
-                temp++;
+                // Desbloquear
+                filho.GetChild(temp).GetComponentInChildren<Text>().text = "Desbloquear";
+                filho.GetChild(temp).tag = "0";
             }
             else
             {
-                string a = "Bloquear";
-                filho.GetChild(temp).GetComponentInChildren<Text>().text = a;
-                filho.GetChild(temp).tag = a;
-                temp++;
+                // Bloquear
+                filho.GetChild(temp).GetComponentInChildren<Text>().text = "Bloquear";
+                filho.GetChild(temp).tag = "1";
             }
+            temp++;
         }
+
+        // Set Button ban
+        if (id == AccountManager.instance.Conta.ID) filho.GetChild(temp++).GetComponent<Button>().interactable = false;
+        else
+        {
+            filho.GetChild(temp).GetComponent<Button>().interactable = true;
+            if (isBanned)
+            {
+                // Desbanir
+                filho.GetChild(temp).GetComponentInChildren<Text>().text = "Desbanir";
+                filho.GetChild(temp).tag = "0";
+            }
+            else
+            {
+                // Banir
+                filho.GetChild(temp).GetComponentInChildren<Text>().text = "Banir";
+                filho.GetChild(temp).tag = "1";
+            }
+            temp++;
+        }
+
+        // Set Button resent email
+        
 
         filho.gameObject.SetActive(true);
     }
 
     private void AtualizarBtns()
     {
+        paginasCount.text = $"{page}/{totalPages}";
+
         if (page < totalPages && page > 1)
         {
             proximoBtn.SetActive(true);

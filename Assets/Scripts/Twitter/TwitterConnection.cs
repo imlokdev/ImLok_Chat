@@ -7,6 +7,8 @@ using UnityEngine.Networking;
 
 using Leguar.TotalJSON;
 using System.Collections.Generic;
+using System.Net;
+using System.Text;
 
 public class TwitterConnection : MonoBehaviour
 {
@@ -21,6 +23,8 @@ public class TwitterConnection : MonoBehaviour
     private void Awake()
     {
         if (instance == null) instance = this;
+        if (localAPI) apiUrl = localURL;
+        else apiUrl = vercelURL;
     }
 
     private void Update()
@@ -29,11 +33,11 @@ public class TwitterConnection : MonoBehaviour
         else apiUrl = vercelURL;
     }
 
-    public void Posts(TwitterSystem script, string id_user) => StartCoroutine(GetPosts(script, id_user));
+    public void Posts(TwitterSystem script, int id_user) => StartCoroutine(GetPosts(script, id_user));
 
-    IEnumerator GetPosts(TwitterSystem script, string id_user)
+    IEnumerator GetPosts(TwitterSystem script, int id_user)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall/{1}");
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall/{id_user}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)

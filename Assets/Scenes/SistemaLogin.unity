@@ -7331,7 +7331,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1000
+  m_ScrollSensitivity: 100
   m_Viewport: {fileID: 1713454528}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 930079539}
@@ -8152,6 +8152,7 @@ MonoBehaviour:
   painelPostagem: {fileID: 0}
   prefab_Post: {fileID: 7596020008252848908, guid: e45455944dbba404dbf1efa7541059f8, type: 3}
   content: {fileID: 216551448}
+  canvas: {fileID: 340297628}
 --- !u!1 &1594281028
 GameObject:
   m_ObjectHideFlags: 0
@@ -10846,6 +10847,10 @@ PrefabInstance:
     - target: {fileID: 7596020008252848908, guid: e45455944dbba404dbf1efa7541059f8, type: 3}
       propertyPath: m_Name
       value: Postagem #0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7596020008252848908, guid: e45455944dbba404dbf1efa7541059f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7596020008252848909, guid: e45455944dbba404dbf1efa7541059f8, type: 3}
       propertyPath: m_Pivot.x

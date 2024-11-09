@@ -1,9 +1,10 @@
-using Leguar.TotalJSON;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
+
 using UnityEngine;
+using UnityEngine.UI;
+
+using Leguar.TotalJSON;
 
 public class TwitterSystem : MonoBehaviour
 {
@@ -64,9 +65,15 @@ public class TwitterSystem : MonoBehaviour
 
         for (int i = 0; i < posts.Count; i++)
         {
+            Post post = posts[i];
+
             var temp = Instantiate(prefab_Post, canvas);
             temp.transform.SetParent(content);
             temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
+
+            temp.GetComponent<Postagem>().SetInfos(post);
+
+            if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
 
             posY -= 200f;
         }

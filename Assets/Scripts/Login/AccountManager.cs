@@ -9,7 +9,7 @@ public class AccountManager : MonoBehaviour
 
     public Conta Conta { get; private set; }
 
-    [SerializeField] GameObject painelAdmin, login;
+    [SerializeField] GameObject painelAdmin, login, twitter;
     [SerializeField] Text feedback, informacoes;
     [SerializeField] Button sairBtn;
 
@@ -72,6 +72,13 @@ public class AccountManager : MonoBehaviour
     {
         gameObject.SetActive(false);
         painelAdmin.SetActive(true);
+        feedback.text = null;
+    }
+
+    public void IniciarButton()
+    {
+        gameObject.SetActive(false);
+        twitter.SetActive(true);
         feedback.text = null;
     }
 

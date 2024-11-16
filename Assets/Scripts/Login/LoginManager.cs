@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,7 +25,6 @@ public class LoginManager : MonoBehaviour
         infosTela.SetActive(true);
         painelAdmin.SetActive(AccountManager.instance.Conta.IsAdmin);
     }
-
 
     public void CriarConta()
     {

@@ -11,7 +11,7 @@ public class AccountManager : MonoBehaviour
 
     [SerializeField] GameObject painelAdmin, login, twitter;
     [SerializeField] Text feedback, informacoes;
-    [SerializeField] Button sairBtn;
+    [SerializeField] Button iniciarBtn, sairBtn;
 
     private void Awake()
     {
@@ -39,6 +39,7 @@ public class AccountManager : MonoBehaviour
             feedback.text = "Sua conta está bloqueada, peça a um administrador para liberá-la.";
             feedback.color = Color.yellow;
         }
+        else iniciarBtn.gameObject.SetActive(true);
 
         string text = "";
         TimeSpan interval = DateTime.Now - Conta.Created_at;

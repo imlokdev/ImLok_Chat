@@ -43,7 +43,8 @@ public class TwitterConnection : MonoBehaviour
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id_user", id_user.ToString() },
-            { "content", content }
+            { "content", content },
+            { "token_acess", AccountManager.instance.Conta.Token_acess }
         };
         JSON json = new(dicio);
         byte[] jsonToSend = new UTF8Encoding().GetBytes(json.CreateString());
@@ -63,12 +64,7 @@ public class TwitterConnection : MonoBehaviour
         {
             Debug.LogError("Erro: " + request.downloadHandler.error);
         }
-        else
-        {
-            JSON jsoninfo = JSON.ParseString(Tools.Api2Json(request.downloadHandler.text));
-
-            script.CriarPost(jsoninfo.CreateString());
-        }
+        else script.CriarPost(request.downloadHandler.text);
 
         button.interactable = true;
 
@@ -77,7 +73,8 @@ public class TwitterConnection : MonoBehaviour
 
     IEnumerator GetPosts(TwitterSystem script, int id_user)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall?id_user={id_user}&count={50}");
+        string token_acess = AccountManager.instance.Conta.Token_acess;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall/{token_acess}?id_user={id_user}&count={50}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)

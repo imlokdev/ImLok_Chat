@@ -46,7 +46,8 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator ResentEmail(PainelAdminScript script, Button button, string id)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"resent/{id}");
+        string token_acess = AccountManager.instance.Conta.Token_acess;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"resent/{token_acess}?id={id}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -57,7 +58,6 @@ public class MySQLConnection : MonoBehaviour
         else
         {
             var resultado = request.downloadHandler.text;
-            Debug.Log("Resposta do servidor: " + resultado);
             script.Atualizar();
         }
 
@@ -68,10 +68,12 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator SetBanAcc(PainelAdminScript script, Button button, string id, string state)
     {
+        string token_acess = AccountManager.instance.Conta.Token_acess;
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id", id },
-            { "state", state }
+            { "state", state },
+            { "token_acess", token_acess }
         };
         JSON json = new(dicio);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
@@ -93,9 +95,7 @@ public class MySQLConnection : MonoBehaviour
         }
         else
         {
-            Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
             print("banimento/desbanimento feito com sucesso.");
-
             script.Atualizar();
         }
 
@@ -106,10 +106,12 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator SetBlockAcc(PainelAdminScript script, Button button, string id, string state)
     {
+        string token_acess = AccountManager.instance.Conta.Token_acess;
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id", id },
-            { "state", state }
+            { "state", state },
+            { "token_acess", token_acess }
         };
         JSON json = new(dicio);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json.CreateString());
@@ -131,9 +133,7 @@ public class MySQLConnection : MonoBehaviour
         }
         else
         {
-            Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
             print("Bloqueio/desbloqueio feito com sucesso.");
-
             script.Atualizar();
         }
 
@@ -144,7 +144,8 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator GetCountAcc(PainelAdminScript script)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + "count");
+        string token_acess = AccountManager.instance.Conta.Token_acess;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"count/{token_acess}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -155,7 +156,6 @@ public class MySQLConnection : MonoBehaviour
         else
         {
             var resultado = request.downloadHandler.text;
-            Debug.Log("Resposta do servidor: " + resultado);
             script.SetCount(GetCount(resultado));
         }
 
@@ -164,7 +164,8 @@ public class MySQLConnection : MonoBehaviour
 
     IEnumerator GetSelectAccs(PainelAdminScript script, int v1, int v2)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"select?v1={v1}&v2={v2}");
+        string token_acess = AccountManager.instance.Conta.Token_acess;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"select/{token_acess}?v1={v1}&v2={v2}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -218,7 +219,8 @@ public class MySQLConnection : MonoBehaviour
                 jsoninfo.GetInt("isBanned") == 1,
                 jsoninfo.GetInt("isConfirmed") == 1,
                 DateTime.Parse(jsoninfo.GetString("created_at")),
-                lastLoginDate
+                lastLoginDate,
+                jsoninfo.GetString("token_acess")
                 );
                    
             AccountManager.instance.SetInfos(conta);
@@ -258,7 +260,6 @@ public class MySQLConnection : MonoBehaviour
         }
         else
         {
-            Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
             feedback.text = "Conta criada com sucesso.";
             feedback.color = Color.green;
             script.ChangeTela();

@@ -11,10 +11,11 @@ public class Conta
     public bool IsConfirmed { get; private set; }
     public DateTime Created_at { get; private set; }
     public DateTime Last_login { get; private set; }
+    public string Token_acess { get; private set; }
 
     public Conta(int _id, string _user, string _email, bool _isBlocked, 
                  bool _isAdmin, bool _isBanned, bool _isConfirmed, 
-                 DateTime _created_at, DateTime _last_login)
+                 DateTime _created_at, DateTime _last_login, string token_acess = null)
     {
         ID = _id;
         User = _user;
@@ -25,5 +26,6 @@ public class Conta
         IsConfirmed = _isConfirmed;
         Created_at = _created_at;
         Last_login = _last_login;
+        Token_acess = token_acess;
     }
 }

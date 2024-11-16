@@ -106,7 +106,7 @@ public class TwitterSystem : MonoBehaviour
 
     public void CriarPost(string result)
     {
-        JSON json = JSON.ParseString(result);
+        JSON json = JSON.ParseString(Tools.Api2Json(result));
 
         int id = json.GetInt("id"),
                 total_likes = json.GetInt("total_likes"),
@@ -173,6 +173,14 @@ public class TwitterSystem : MonoBehaviour
                     sArray[j].UpdateInfos(total_likes, total_comments);
                     break;
                 }
+        }
+    }
+
+    public void EndScroll(ScrollRect scrollRect)
+    {
+        if (scrollRect.verticalNormalizedPosition <= 0.01f) // 0.01 para tolerância
+        {
+            Debug.Log("Chegou ao final da Scroll View!");
         }
     }
 }

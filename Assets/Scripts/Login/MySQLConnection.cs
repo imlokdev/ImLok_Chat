@@ -58,9 +58,10 @@ public class MySQLConnection : MonoBehaviour
         {
             var resultado = request.downloadHandler.text;
             Debug.Log("Resposta do servidor: " + resultado);
-            button.interactable = true;
             script.Atualizar();
         }
+
+        button.interactable = true;
 
         request.Dispose();
     }

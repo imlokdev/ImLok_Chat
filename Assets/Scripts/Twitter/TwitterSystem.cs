@@ -5,20 +5,36 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
+using Unity.VisualScripting;
 
 public class TwitterSystem : MonoBehaviour
 {
     TwitterConnection conn;
 
-    [SerializeField] GameObject infosConta, painelPostagem, prefab_Post;
+    [SerializeField] GameObject infosConta, prefab_Post;
     [SerializeField] RectTransform content, canvas;
+    [SerializeField] InputField postInput;
+    [SerializeField] Button postBtn;
 
-    List<Post> posts = new();
+    readonly LinkedList<Post> posts = new();
+    
+    public float timeUpdateDatetime = 60f;
+    private float timeCD;
 
     private void Start()
     {
         conn = TwitterConnection.instance;
         conn.Posts(this, 1);
+        timeCD = Time.time;
+    }
+
+    private void Update()
+    {
+        if (Time.time - timeCD > timeUpdateDatetime)
+        {
+            conn.AtualizarPosts(this, 1, posts.Count);
+            timeCD = Time.time;
+        }
     }
 
     public void ContaButton()
@@ -27,15 +43,18 @@ public class TwitterSystem : MonoBehaviour
         infosConta.SetActive(true);
     }
 
-    public void AbrirPainelPostagem()
+    public void PostarButton()
     {
-        gameObject.SetActive(false);
-        painelPostagem.SetActive(true);
+        if (String.IsNullOrEmpty(postInput.text)) return;
+
+        postBtn.interactable = false;
+        conn.NewPost(this, 1, postInput.text, postBtn);
+        postInput.text = null;
     }
 
     public void CriarPosts(string result)
     {
-        JSON[] json = JSON.ParseStringToMultiple(Api2Json(result));
+        JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
 
         for (int i = 0; i < json.Length; i++)
         {
@@ -49,7 +68,7 @@ public class TwitterSystem : MonoBehaviour
 
             Post post = new(id, user, content, data_pub, total_likes, total_comments, user_liked);
             
-            posts.Add(post);
+            posts.AddLast(post);
         }
 
         SetPostsTela();
@@ -63,15 +82,21 @@ public class TwitterSystem : MonoBehaviour
 
         content.sizeDelta = new(0, tamanhoContent);
 
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
         for (int i = 0; i < posts.Count; i++)
         {
-            Post post = posts[i];
+            Post post = sArray[i];
 
             var temp = Instantiate(prefab_Post, canvas);
             temp.transform.SetParent(content);
             temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
 
-            temp.GetComponent<Postagem>().SetInfos(post);
+            var classe = temp.GetComponent<Postagem>();
+            classe.SetInfos(post);
+
+            post.SetClasse(classe);
 
             if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
 
@@ -79,26 +104,75 @@ public class TwitterSystem : MonoBehaviour
         }
     }
 
-    private string Api2Json(string apiString)
+    public void CriarPost(string result)
     {
-        var temp = apiString.Replace("[", "").Replace("]", "").Trim();
+        JSON json = JSON.ParseString(result);
 
-        while (true)
+        int id = json.GetInt("id"),
+                total_likes = json.GetInt("total_likes"),
+                total_comments = json.GetInt("total_comments");
+        string user = json.GetString("user"),
+               content = json.GetString("content");
+        DateTime data_pub = DateTime.Parse(json.GetString("data_pub"));
+        bool user_liked = json.GetInt("user_liked") == 1;
+
+        Post post = new(id, user, content, data_pub, total_likes, total_comments, user_liked);
+
+        posts.AddFirst(post);
+        SetNewPostTela(post);
+    }
+
+    private void SetNewPostTela(Post post)
+    {
+        int totalPosts = posts.Count;
+        float tamanhoContent = totalPosts * 200f;
+        float posY = tamanhoContent / 2 - 100f;
+
+        content.sizeDelta = new(0, tamanhoContent);
+
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        for (int i = 0; i < posts.Count; i++)
         {
-            int index = -1;
+            if (sArray[i] == sArray[0])
+            {
+                var temp = Instantiate(prefab_Post, canvas);
+                temp.transform.SetParent(content);
+                temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
 
-            for (int i = 0; i < temp.Length; i++)
-                if (i + 1 < temp.Length)
-                    if (temp[i] == '}' && temp[i + 1] == ',')
-                    {
-                        index = i + 1;
-                        break;
-                    }
+                var classe = temp.GetComponent<Postagem>();
+                classe.SetInfos(post);
 
-            if (index < 0) break;
-            else temp = temp.Remove(index, 1);
+                sArray[i].SetClasse(classe);
+
+                if (posts.Count % 2 != 0) temp.GetComponent<Image>().color = Color.gray;
+            }
+            else sArray[i].Postagem.gameObject.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
+
+            posY -= 200f;
         }
+    }
 
-        return temp;
+    public void UpdateAllPosts(string result)
+    {
+        JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
+
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        for (int i = 0; i < json.Length; i++)
+        {
+            int id = json[i].GetInt("id"),
+                total_likes = json[i].GetInt("total_likes"),
+                total_comments = json[i].GetInt("total_comments");
+
+            for (int j = 0; j < sArray.Length; j++)
+                if (sArray[j].ID == id)
+                {
+                    sArray[j].UpdateInfos(total_likes, total_comments);
+                    break;
+                }
+        }
     }
 }

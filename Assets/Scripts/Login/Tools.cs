@@ -109,4 +109,27 @@ public class Tools
 
         return $"{(int)time/60:00}:{time-(((int)(time / 60))*60):00}";
     }
+
+    public static string Api2Json(string apiString)
+    {
+        var temp = apiString.Replace("[", "").Replace("]", "").Trim();
+
+        while (true)
+        {
+            int index = -1;
+
+            for (int i = 0; i < temp.Length; i++)
+                if (i + 1 < temp.Length)
+                    if (temp[i] == '}' && temp[i + 1] == ',')
+                    {
+                        index = i + 1;
+                        break;
+                    }
+
+            if (index < 0) break;
+            else temp = temp.Remove(index, 1);
+        }
+
+        return temp;
+    }
 }

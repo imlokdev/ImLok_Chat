@@ -19,6 +19,7 @@ public class TwitterSystem : MonoBehaviour
     readonly LinkedList<Post> posts = new();
     
     public float timeUpdateDatetime = 60f;
+    private bool blockEndScroll;
     private float timeCD;
 
     private void Start()
@@ -146,7 +147,8 @@ public class TwitterSystem : MonoBehaviour
 
                 sArray[i].SetClasse(classe);
 
-                if (posts.Count % 2 != 0) temp.GetComponent<Image>().color = Color.gray;
+                print(posts.Count);
+                if ((posts.Count-1) % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
             }
             else sArray[i].Postagem.gameObject.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
 
@@ -176,11 +178,12 @@ public class TwitterSystem : MonoBehaviour
         }
     }
 
-    public void EndScroll(ScrollRect scrollRect)
+    public void EndScroll(Vector2 position)
     {
-        if (scrollRect.verticalNormalizedPosition <= 0.01f) // 0.01 para tolerância
+        if (position.y <= 0.01f && !blockEndScroll) // 0.01 para tolerância
         {
             Debug.Log("Chegou ao final da Scroll View!");
+            blockEndScroll = true;
         }
     }
 }

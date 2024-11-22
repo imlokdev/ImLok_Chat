@@ -14,7 +14,7 @@ public class TwitterConnection : MonoBehaviour
     string apiUrl;
 
     readonly string localURL = "http://127.0.0.1:5000/",
-        vercelURL = "https://api-my-sql.vercel.app/";
+        vercelURL = "https://twitter-system.vercel.app/";
 
     [SerializeField] bool localAPI;
 
@@ -85,7 +85,6 @@ public class TwitterConnection : MonoBehaviour
         else
         {
             var resultado = request.downloadHandler.text;
-            Debug.Log("Resposta do servidor: " + resultado);
             script.CriarPosts(resultado);
         }
 
@@ -161,7 +160,8 @@ public class TwitterConnection : MonoBehaviour
 
     IEnumerator UpdateAllPosts(TwitterSystem script, int id_user, int count)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall?id_user={id_user}&count={count}");
+        string token_acess = AccountManager.instance.Conta.Token_acess;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall/{token_acess}?id_user={id_user}&count={count}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)

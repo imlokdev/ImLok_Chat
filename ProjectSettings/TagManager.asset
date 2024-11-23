@@ -8,6 +8,7 @@ TagManager:
   - Desbloquear
   - 1
   - 0
+  - Desabilitar
   layers:
   - Default
   - TransparentFX

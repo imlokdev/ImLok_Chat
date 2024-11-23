@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public class Post
 {
@@ -31,4 +30,6 @@ public class Post
         Total_comments = total_comments;
         Postagem.UpdateInfos(this);
     }
+
+    public string ToString() => $"ID: {ID}, USER: {User}, Content: {Content}";
 }

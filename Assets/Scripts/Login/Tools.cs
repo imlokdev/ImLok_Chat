@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using UnityEngine;
 
 public class Tools
@@ -131,5 +132,22 @@ public class Tools
         }
 
         return temp;
+    }
+
+    public static string DateTimeToTimer(DateTime data_pub)
+    {
+        TimeSpan interval = DateTime.Now - data_pub;
+
+        if (interval.TotalDays >= 365)
+            return $"{data_pub.Day} {data_pub.ToString("MMM", new CultureInfo("pt-BR"))} {data_pub.Year}";
+        if (interval.TotalDays >= 1)
+            return $"{data_pub.Day} {data_pub.ToString("MMM", new CultureInfo("pt-BR"))}";
+        if (interval.TotalHours >= 1)
+            return $"{interval.Hours} h";
+        if (interval.TotalMinutes >= 1)
+            return $"{interval.Minutes} min";
+        if (interval.TotalSeconds > 0)
+            return $"{interval.Seconds} s";
+        return null;
     }
 }

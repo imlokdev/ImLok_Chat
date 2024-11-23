@@ -11,6 +11,7 @@ public class Postagem : MonoBehaviour
     TwitterConnection conn;
 
     Post post;
+    CommentManager commManager;
 
     [SerializeField] Image likeImg;
     [SerializeField] Text user, content, likes, comments, timer;
@@ -24,13 +25,15 @@ public class Postagem : MonoBehaviour
     {
         conn = TwitterConnection.instance;
         timeCD = Time.time;
+        commManager = transform.parent.GetComponent<CommentManager>();
+        if (!CompareTag("Desabilitar")) GetComponent<Button>().onClick.AddListener(() => commManager.AbrirPostagem(post));
     }
 
     private void Update()
     {
         if (Time.time -  timeCD > timeUpdateDatetime)
         {
-            timer.text = DateTimeToTimer(post.Data_pub);
+            timer.text = Tools.DateTimeToTimer(post.Data_pub);
             timeCD = Time.time;
         }
     }
@@ -43,7 +46,7 @@ public class Postagem : MonoBehaviour
         content.text = post.Content;
         likes.text = post.Total_likes.ToString();
         comments.text = post.Total_comments.ToString();
-        timer.text = DateTimeToTimer(post.Data_pub);
+        timer.text = Tools.DateTimeToTimer(post.Data_pub);
 
         if (post.User_liked) likeImg.sprite = likePreenchido;
         else likeImg.sprite = likeVazio;
@@ -66,23 +69,6 @@ public class Postagem : MonoBehaviour
 
     public void UpdateInfos(Post post) => SetInfos(post);
 
-    private string DateTimeToTimer(DateTime data_pub)
-    {
-        TimeSpan interval = DateTime.Now - data_pub;
-
-        if (interval.TotalDays >= 365) 
-            return $"{data_pub.Day} {data_pub.ToString("MMM", new CultureInfo("pt-BR"))} {data_pub.Year}";
-        if (interval.TotalDays >= 1)
-            return $"{data_pub.Day} {data_pub.ToString("MMM", new CultureInfo("pt-BR"))}";
-        if (interval.TotalHours >= 1) 
-            return $"{interval.Hours} h";
-        if (interval.TotalMinutes >= 1)
-            return $"{interval.Minutes} min";
-        if (interval.TotalSeconds > 0)
-            return $"{interval.Seconds} s";
-        return null;
-    }
-
     public void LikeBtn()
     {
         likeBtn.interactable = false;
@@ -91,7 +77,11 @@ public class Postagem : MonoBehaviour
         else conn.Like(this, 1, post.ID, true);
     }
 
-    public void CommentBtn() => print("Clicando no comentario");
+    public void CommentBtn()
+    {
+        if (CompareTag("Desabilitar")) return;
+        commManager.AbrirPostagem(post);
+    }
 
     public void MudarLike(bool state)
     {

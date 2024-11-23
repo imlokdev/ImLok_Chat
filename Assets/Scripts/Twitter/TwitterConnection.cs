@@ -37,7 +37,40 @@ public class TwitterConnection : MonoBehaviour
 
     public void Like(Postagem script, int id_user, int id_post, bool active) => StartCoroutine(SetLike(script, id_user, id_post, active));
     public void AtualizarPost(Postagem script, int id_user, int id_post) => StartCoroutine(UpdatePost(script, id_user, id_post));
-    
+
+    public void Comments(CommentManager script, int id_post) => StartCoroutine(GetComments(script, id_post));
+
+    IEnumerator GetComments(CommentManager script, int id_post)
+    {
+        IDictionary dicio = new Dictionary<string, string>
+        {
+            { "id_user", AccountManager.instance.Conta.ID.ToString() },
+            { "id_post", id_post.ToString() },
+            { "token_acess", AccountManager.instance.Conta.Token_acess }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new UTF8Encoding().GetBytes(json.CreateString());
+        UnityWebRequest request;
+
+        request = new(apiUrl + "comments", "POST")
+        {
+            uploadHandler = new UploadHandlerRaw(jsonToSend),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Erro: " + request.downloadHandler.error);
+        }
+        else script.CriarComentarios(request.downloadHandler.text);
+
+        request.Dispose();
+    }
+
     IEnumerator CreatePost(TwitterSystem script, int id_user, string content, Button button)
     {
         IDictionary dicio = new Dictionary<string, string>

@@ -5,18 +5,18 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
-using Unity.VisualScripting;
 
 public class TwitterSystem : MonoBehaviour
 {
     TwitterConnection conn;
 
-    [SerializeField] GameObject infosConta, prefab_Post;
+    [SerializeField] GameObject infosConta, prefab_Post, main, comment;
     [SerializeField] RectTransform content, canvas;
     [SerializeField] InputField postInput;
     [SerializeField] Button postBtn;
 
     readonly LinkedList<Post> posts = new();
+    public readonly LinkedList<Comment> comments = new();
     
     public float timeUpdateDatetime = 60f;
     private bool blockEndScroll;
@@ -185,5 +185,11 @@ public class TwitterSystem : MonoBehaviour
             Debug.Log("Chegou ao final da Scroll View!");
             blockEndScroll = true;
         }
+    }
+
+    public void CommentToMain()
+    {
+        comment.SetActive(false);
+        main.SetActive(true);
     }
 }

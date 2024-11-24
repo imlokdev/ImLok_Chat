@@ -26,7 +26,7 @@ public class Postagem : MonoBehaviour
         conn = TwitterConnection.instance;
         timeCD = Time.time;
         commManager = transform.parent.GetComponent<CommentManager>();
-        if (!CompareTag("Desabilitar")) GetComponent<Button>().onClick.AddListener(() => commManager.AbrirPostagem(post));
+        if (!CompareTag("Desabilitar")) GetComponent<Button>().onClick.AddListener(() => commManager.OpenPostagem(post));
     }
 
     private void Update()
@@ -80,7 +80,7 @@ public class Postagem : MonoBehaviour
     public void CommentBtn()
     {
         if (CompareTag("Desabilitar")) return;
-        commManager.AbrirPostagem(post);
+        commManager.OpenPostagem(post);
     }
 
     public void MudarLike(bool state)

@@ -62,11 +62,8 @@ public class TwitterConnection : MonoBehaviour
 
         yield return request.SendWebRequest();
 
-        if (request.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError("Erro: " + request.downloadHandler.error);
-        }
-        else script.CriarComentarios(request.downloadHandler.text);
+        if (request.result == UnityWebRequest.Result.Success)
+            script.CreateComments(request.downloadHandler.text);
 
         request.Dispose();
     }

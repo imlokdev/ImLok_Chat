@@ -16,7 +16,6 @@ public class TwitterSystem : MonoBehaviour
     [SerializeField] Button postBtn;
 
     readonly LinkedList<Post> posts = new();
-    public readonly LinkedList<Comment> comments = new();
     
     public float timeUpdateDatetime = 60f;
     private bool blockEndScroll;
@@ -191,5 +190,84 @@ public class TwitterSystem : MonoBehaviour
     {
         comment.SetActive(false);
         main.SetActive(true);
+    }
+
+    public void AddComment(CommentManager script, int id_post, Comment comment, bool @new = false)
+    {
+        if (ContainsInPost(id_post, comment)) return;
+
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        foreach (var item in sArray)
+            if (item.ID == id_post)
+            {
+                if (@new) item.Comments.AddFirst(comment);
+                else item.Comments.AddLast(comment);
+                break;
+            }
+    }
+
+    public void ShowExistingComments(CommentManager script, int id_post)
+    {
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        foreach (var item in sArray)
+            if (item.ID == id_post)
+            {
+                Comment[] sArray2 = new Comment[item.Comments.Count];
+                item.Comments.CopyTo(sArray2, 0);
+
+                foreach (var item2 in sArray2)
+                    script.SetCommentInScreen(sArray2, item2);
+            }
+    }
+
+    public LinkedList<Comment> GetComments(int id_post)
+    {
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        foreach (var item in sArray)
+            if (item.ID == id_post) return item.Comments;
+        return null;
+    }
+
+    public void ClearCommentsObjects()
+    {
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        foreach (var item in sArray)
+            if (item.Total_comments > 0)
+            {
+                Comment[] sArray2 = new Comment[item.Comments.Count];
+                item.Comments.CopyTo(sArray2, 0);
+
+                foreach (var item2 in sArray2)
+                    if (item2.Comentario != null)
+                    {
+                        print($"Destruindo o objeto do comentário: {item2.Content}");
+                        Destroy(item2.Comentario.gameObject);
+                    }
+            }
+    }
+
+    private bool ContainsInPost(int id_post, Comment comment)
+    {
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        foreach (var item in sArray)
+            if (item.ID == id_post)
+            {
+                Comment[] sArray2 = new Comment[item.Comments.Count];
+                item.Comments.CopyTo(sArray2, 0);
+
+                foreach (var item2 in sArray2)
+                    if (item2.Equals(comment)) return true;
+            }
+        return false;
     }
 }

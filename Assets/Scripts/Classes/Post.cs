@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public class Post
 {
@@ -10,6 +11,7 @@ public class Post
     public int Total_comments { get; private set; }
     public bool User_liked { get; private set; }
     public Postagem Postagem { get; private set; }
+    public LinkedList<Comment> Comments { get; private set; }
 
     public Post (int id, string user, string content, DateTime data_pub, int total_likes, int total_comments, bool user_liked)
     {
@@ -20,6 +22,7 @@ public class Post
         Total_likes = total_likes;
         Total_comments = total_comments;
         User_liked = user_liked;
+        Comments = new();
     }
 
     public void SetClasse(Postagem objeto) => Postagem = objeto;

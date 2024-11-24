@@ -1,7 +1,10 @@
-using Leguar.TotalJSON;
 using System;
+using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
+
+using Leguar.TotalJSON;
 
 public class CommentManager : MonoBehaviour
 {
@@ -19,16 +22,20 @@ public class CommentManager : MonoBehaviour
 
     private void Start() => conn = TwitterConnection.instance;
 
-    public void AbrirPostagem(Post post)
+    public void OpenPostagem(Post post)
     {
+        content.sizeDelta = Vector2.zero;
+        twt.ClearCommentsObjects();
+
         postagem.SetInfos(post);
+        twt.ShowExistingComments(this, post.ID);
         conn.Comments(this, post.ID);
 
         main.SetActive(false);
         commentTela.SetActive(true);
     }
 
-    public void CriarComentarios(string result)
+    public void CreateComments(string result)
     {
         JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
 
@@ -41,37 +48,72 @@ public class CommentManager : MonoBehaviour
 
             Comment comment = new(id_post, user, content, data_pub);
 
-            twt.comments.AddLast(comment);
+            twt.AddComment(this, id_post, comment);
+            SetCommentsInScreen(twt.GetComments(id_post));
         }
-
-        SetCommentsTela();
     }
 
-    private void SetCommentsTela()
+    public void SetCommentInScreen(Comment[] comments, Comment comment)
     {
-        int totalPosts = twt.comments.Count;
+        int totalPosts = comments.Length;
         float tamanhoContent = totalPosts * 200f;
         float posY = tamanhoContent / 2 - 100f;
 
         content.sizeDelta = new(0, tamanhoContent);
 
-        Comment[] sArray = new Comment[twt.comments.Count];
-        twt.comments.CopyTo(sArray, 0);
-
-        for (int i = 0; i < twt.comments.Count; i++)
+        for (int i = 0; i < totalPosts; i++)
         {
-            Comment comment = sArray[i];
+            if (comments[i].Equals(comment))
+            {
+                var temp = Instantiate(prefab_Comment, canvas);
+                temp.transform.SetParent(content);
+                temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
 
-            var temp = Instantiate(prefab_Comment, canvas);
-            temp.transform.SetParent(content);
-            temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
+                var classe = temp.GetComponent<Comentario>();
+                classe.SetInfos(comment);
 
-            var classe = temp.GetComponent<Comentario>();
-            classe.SetInfos(comment);
+                comment.SetClasse(classe);
 
-            comment.SetClasse(classe);
+                if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
+            }
 
-            if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
+            posY -= 200f;
+        }
+    }
+
+    private void SetCommentsInScreen(LinkedList<Comment> comments)
+    {
+        int totalPosts = comments.Count;
+        float tamanhoContent = totalPosts * 200f;
+        float posY = tamanhoContent / 2 - 100f;
+
+        content.sizeDelta = new(0, tamanhoContent);
+
+        Comment[] sArray = new Comment[comments.Count];
+        comments.CopyTo(sArray, 0);
+
+        for (int i = 0; i < comments.Count; i++)
+        {
+            if (i != totalPosts-1)
+            {
+                RectTransform rect = sArray[i].Comentario.GetComponent<RectTransform>();
+                rect.anchoredPosition = new(0, posY);
+            }
+            else
+            {
+                Comment comment = sArray[i];
+
+                var temp = Instantiate(prefab_Comment, canvas);
+                temp.transform.SetParent(content);
+                temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
+
+                var classe = temp.GetComponent<Comentario>();
+                classe.SetInfos(comment);
+
+                comment.SetClasse(classe);
+
+                if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
+            }
 
             posY -= 200f;
         }

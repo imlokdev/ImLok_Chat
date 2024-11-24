@@ -17,4 +17,12 @@ public class Comment
     }
 
     public void SetClasse(Comentario objeto) => Comentario = objeto;
+
+    public bool Equals(Comment other)
+    {
+        if (ID_post == other.ID_post && User == other.User && 
+            Content == other.Content && Data_pub == other.Data_pub) 
+            return true;
+        return false;
+    }
 }

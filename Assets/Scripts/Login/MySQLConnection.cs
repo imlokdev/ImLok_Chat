@@ -47,7 +47,8 @@ public class MySQLConnection : MonoBehaviour
     IEnumerator ResentEmail(PainelAdminScript script, Button button, string id)
     {
         string token_acess = AccountManager.instance.Conta.Token_acess;
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"resent/{token_acess}?id={id}");
+        int id_user = AccountManager.instance.Conta.ID;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"resent/{token_acess}?id_user={id_user}&id={id}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -69,10 +70,12 @@ public class MySQLConnection : MonoBehaviour
     IEnumerator SetBanAcc(PainelAdminScript script, Button button, string id, string state)
     {
         string token_acess = AccountManager.instance.Conta.Token_acess;
+        int id_user = AccountManager.instance.Conta.ID;
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id", id },
             { "state", state },
+            { "id_user", id_user.ToString()},
             { "token_acess", token_acess }
         };
         JSON json = new(dicio);
@@ -107,10 +110,12 @@ public class MySQLConnection : MonoBehaviour
     IEnumerator SetBlockAcc(PainelAdminScript script, Button button, string id, string state)
     {
         string token_acess = AccountManager.instance.Conta.Token_acess;
+        int id_user = AccountManager.instance.Conta.ID;
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id", id },
             { "state", state },
+            { "id_user", id_user.ToString()},
             { "token_acess", token_acess }
         };
         JSON json = new(dicio);
@@ -145,7 +150,8 @@ public class MySQLConnection : MonoBehaviour
     IEnumerator GetCountAcc(PainelAdminScript script)
     {
         string token_acess = AccountManager.instance.Conta.Token_acess;
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"count/{token_acess}");
+        int id_user = AccountManager.instance.Conta.ID;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"count/{token_acess}?id_user={id_user}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -165,7 +171,8 @@ public class MySQLConnection : MonoBehaviour
     IEnumerator GetSelectAccs(PainelAdminScript script, int v1, int v2)
     {
         string token_acess = AccountManager.instance.Conta.Token_acess;
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"select/{token_acess}?v1={v1}&v2={v2}");
+        int id_user = AccountManager.instance.Conta.ID;
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"select/{token_acess}?id_user={id_user}&v1={v1}&v2={v2}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)

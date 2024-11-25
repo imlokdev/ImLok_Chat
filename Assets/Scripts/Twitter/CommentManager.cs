@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
+using Unity.VisualScripting;
 
 public class CommentManager : MonoBehaviour
 {
@@ -37,6 +38,7 @@ public class CommentManager : MonoBehaviour
 
     public void CreateComments(string result)
     {
+        print("Executando o CreateComments");
         JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
 
         for (int i = 0; i < json.Length; i++)
@@ -48,13 +50,17 @@ public class CommentManager : MonoBehaviour
 
             Comment comment = new(id_post, user, content, data_pub);
 
-            twt.AddComment(this, id_post, comment);
-            SetCommentsInScreen(twt.GetComments(id_post));
+            if (!twt.ContainsInPost(id_post, comment))
+            {
+                twt.AddComment(this, id_post, comment);
+                SetCommentsInScreen(twt.GetComments(id_post));
+            }
         }
     }
 
     public void SetCommentInScreen(Comment[] comments, Comment comment)
     {
+        print("Executando o SetCommentInScreen");
         int totalPosts = comments.Length;
         float tamanhoContent = totalPosts * 200f;
         float posY = tamanhoContent / 2 - 100f;
@@ -65,6 +71,7 @@ public class CommentManager : MonoBehaviour
         {
             if (comments[i].Equals(comment))
             {
+                print($"Criando o comentario: {comment.Content}");
                 var temp = Instantiate(prefab_Comment, canvas);
                 temp.transform.SetParent(content);
                 temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
@@ -81,8 +88,9 @@ public class CommentManager : MonoBehaviour
         }
     }
 
-    private void SetCommentsInScreen(LinkedList<Comment> comments)
+    public void SetCommentsInScreen(LinkedList<Comment> comments)
     {
+        print("Executando o SetCommentsInScreen");
         int totalPosts = comments.Count;
         float tamanhoContent = totalPosts * 200f;
         float posY = tamanhoContent / 2 - 100f;
@@ -92,17 +100,21 @@ public class CommentManager : MonoBehaviour
         Comment[] sArray = new Comment[comments.Count];
         comments.CopyTo(sArray, 0);
 
+        print($"Total post: {totalPosts} / Comments.Count: {comments.Count}");
+
         for (int i = 0; i < comments.Count; i++)
         {
             if (i != totalPosts-1)
             {
+                print($"Reativando e organizando o comentário: {sArray[i].Content}");
                 RectTransform rect = sArray[i].Comentario.GetComponent<RectTransform>();
                 rect.anchoredPosition = new(0, posY);
+                rect.gameObject.SetActive(true);
             }
             else
             {
                 Comment comment = sArray[i];
-
+                print($"Instanciando o comentário: {comment.Content}");
                 var temp = Instantiate(prefab_Comment, canvas);
                 temp.transform.SetParent(content);
                 temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);

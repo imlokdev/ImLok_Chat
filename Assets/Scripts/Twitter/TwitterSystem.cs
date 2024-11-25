@@ -210,6 +210,7 @@ public class TwitterSystem : MonoBehaviour
 
     public void ShowExistingComments(CommentManager script, int id_post)
     {
+        print("Executando o ShowExistingComments");
         Post[] sArray = new Post[posts.Count];
         posts.CopyTo(sArray, 0);
 
@@ -220,7 +221,11 @@ public class TwitterSystem : MonoBehaviour
                 item.Comments.CopyTo(sArray2, 0);
 
                 foreach (var item2 in sArray2)
-                    script.SetCommentInScreen(sArray2, item2);
+                    print(item2.Content);
+                    // script.SetCommentInScreen(sArray2, item2);
+
+                script.SetCommentsInScreen(item.Comments);
+                break;
             }
     }
 
@@ -249,12 +254,13 @@ public class TwitterSystem : MonoBehaviour
                     if (item2.Comentario != null)
                     {
                         print($"Destruindo o objeto do comentário: {item2.Content}");
-                        Destroy(item2.Comentario.gameObject);
+                        //Destroy(item2.Comentario.gameObject);
+                        item2.Comentario.gameObject.SetActive(false);
                     }
             }
     }
 
-    private bool ContainsInPost(int id_post, Comment comment)
+    public bool ContainsInPost(int id_post, Comment comment)
     {
         Post[] sArray = new Post[posts.Count];
         posts.CopyTo(sArray, 0);

@@ -11,6 +11,8 @@ using System.Collections.Generic;
 public class MySQLConnection : MonoBehaviour
 {
     public static MySQLConnection instance;
+    SessionManager sessionManager;
+
     string apiUrl;
 
     readonly string localURL = "http://127.0.0.1:5000/", 
@@ -21,6 +23,7 @@ public class MySQLConnection : MonoBehaviour
     private void Awake()
     {
         if (instance == null) instance = this;
+        sessionManager = GetComponent<SessionManager>();
     }
 
     private void Update()
@@ -94,6 +97,7 @@ public class MySQLConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.error);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
             print("Algo deu errado na tentavida de banir/desbanir a conta.");
         }
         else
@@ -134,6 +138,7 @@ public class MySQLConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.error);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
             print("Algo deu errado na tentavida de bloquear/desbloquear a conta.");
         }
         else
@@ -157,6 +162,7 @@ public class MySQLConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.error);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
             Debug.LogError("Tabela vazia.");
         }
         else
@@ -176,7 +182,10 @@ public class MySQLConnection : MonoBehaviour
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
+        {
             Debug.LogError("Erro: " + request.downloadHandler.text);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
+        }
         else script.SetContas(request.downloadHandler.text);
 
         request.Dispose();

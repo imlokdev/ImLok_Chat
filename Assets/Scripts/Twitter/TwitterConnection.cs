@@ -11,6 +11,9 @@ using UnityEngine.UI;
 public class TwitterConnection : MonoBehaviour
 {
     public static TwitterConnection instance;
+
+    SessionManager sessionManager;
+
     string apiUrl;
 
     readonly string localURL = "http://127.0.0.1:5000/",
@@ -23,6 +26,8 @@ public class TwitterConnection : MonoBehaviour
         if (instance == null) instance = this;
         if (localAPI) apiUrl = localURL;
         else apiUrl = vercelURL;
+
+        sessionManager = GetComponent<SessionManager>();
     }
 
     private void Update()
@@ -64,6 +69,8 @@ public class TwitterConnection : MonoBehaviour
 
         if (request.result == UnityWebRequest.Result.Success)
             script.CreateComments(request.downloadHandler.text);
+        else 
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
 
         request.Dispose();
     }
@@ -93,6 +100,7 @@ public class TwitterConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.downloadHandler.error);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
         else script.CriarPost(request.downloadHandler.text);
 
@@ -111,6 +119,7 @@ public class TwitterConnection : MonoBehaviour
         {
             Debug.LogError("Erro: " + request.error);
             Debug.LogError("Nenhum post encontrado.");
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
         else
         {
@@ -156,6 +165,7 @@ public class TwitterConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.downloadHandler.error);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
         else
         {
@@ -198,6 +208,7 @@ public class TwitterConnection : MonoBehaviour
         {
             Debug.LogError("Erro: " + request.error);
             Debug.LogError("Nenhum post encontrado.");
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
         else
         {

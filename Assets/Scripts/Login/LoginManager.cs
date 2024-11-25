@@ -77,5 +77,7 @@ public class LoginManager : MonoBehaviour
     {
         if (!awake) PlayerPrefs.SetString(key, nicknameInput.text);
         else if (PlayerPrefs.HasKey(key)) nicknameInput.text = PlayerPrefs.GetString(key);
+
+        passwordInput.Select();
     } 
 }

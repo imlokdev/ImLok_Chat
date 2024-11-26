@@ -6,10 +6,13 @@ using UnityEngine.UI;
 
 using Leguar.TotalJSON;
 using Unity.VisualScripting;
+using System.Xml.Linq;
 
 public class CommentManager : MonoBehaviour
 {
     TwitterConnection conn;
+
+    Post postOpenned;
 
     [SerializeField] TwitterSystem twt;
     [SerializeField] Postagem postagem;
@@ -25,6 +28,8 @@ public class CommentManager : MonoBehaviour
 
     public void OpenPostagem(Post post)
     {
+        postOpenned = post;
+
         content.sizeDelta = Vector2.zero;
         twt.ClearCommentsObjects();
 
@@ -34,6 +39,38 @@ public class CommentManager : MonoBehaviour
 
         main.SetActive(false);
         commentTela.SetActive(true);
+    }
+
+    public void ComentarButton()
+    {
+        if (String.IsNullOrEmpty(commentInput.text)) return;
+
+        conn.NewComment(this, postOpenned.ID, commentInput.text, commentBtn);
+        commentBtn.interactable = false;
+        commentInput.text = null;
+    }
+
+    public void CreateComment(string result)
+    {
+        JSON json = JSON.ParseString(result);
+
+        int id_post = json.GetInt("id_post");
+        string user = json.GetString("user"),
+               content = json.GetString("content");
+        DateTime data_pub = DateTime.Parse(json.GetString("data_pub"));
+
+        Comment comment = new(id_post, user, content, data_pub);
+
+        if (!twt.ContainsInPost(id_post, comment))
+        {
+            twt.AddComment(this, id_post, comment, true);
+            var comments = twt.GetComments(id_post);
+            Comment[] sArray = new Comment[comments.Count];
+            comments.CopyTo(sArray, 0);
+            SetCommentInScreen(sArray, comment);
+        }
+
+        commentBtn.interactable = false;
     }
 
     public void CreateComments(string result)
@@ -78,7 +115,12 @@ public class CommentManager : MonoBehaviour
 
                 comment.SetClasse(classe);
 
-                if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
+                if (totalPosts % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
+            }
+            else
+            {
+                RectTransform rect = comments[i].Comentario.GetComponent<RectTransform>();
+                rect.anchoredPosition = new(0, posY);
             }
 
             posY -= 200f;

@@ -54,7 +54,7 @@ public class TwitterSystem : MonoBehaviour
         if (String.IsNullOrEmpty(postInput.text)) return;
 
         postBtn.interactable = false;
-        conn.NewPost(this, 1, postInput.text, postBtn);
+        conn.NewPost(this, postInput.text, postBtn);
         postInput.text = null;
     }
 

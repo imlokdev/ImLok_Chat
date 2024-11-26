@@ -5072,9 +5072,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1587154804}
-        m_TargetAssemblyTypeName: TwitterSystem, Assembly-CSharp
-        m_MethodName: PostarButton
+      - m_Target: {fileID: 216551449}
+        m_TargetAssemblyTypeName: CommentManager, Assembly-CSharp
+        m_MethodName: ComentarButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

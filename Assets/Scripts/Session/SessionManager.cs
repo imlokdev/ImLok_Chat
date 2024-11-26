@@ -11,18 +11,18 @@ public class SessionManager : MonoBehaviour
 
     public void FinalizarSessao(string result, long httpcode)
     {
+        if (httpcode != 401) return;
+
         JSON json = JSON.ParseString(result);
 
-        print(json.GetString("error"));
-
-        if (json.GetString("error") == "session_expired" && httpcode == 401)
+        if (json.GetString("error") == "session_expired")
         {
             foreach (var item in screens)
                 item.SetActive(false);
 
             telaLogin.SetActive(true);
 
-            feedback.text = "Sessão expirada";
+            feedback.text = "Sessão expirada.";
             feedback.color = Color.red;
         }
     }

@@ -1119,6 +1119,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nicknameInput: {fileID: 625818522}
   passwordInput: {fileID: 57258033}
+  loginButton: {fileID: 656801319}
   feedback: {fileID: 586715342}
   infosTela: {fileID: 1803875105}
   painelAdmin: {fileID: 591716271}
@@ -7772,6 +7773,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 703548872}
     m_Modifications:
+    - target: {fileID: 2933829672580339651, guid: e45455944dbba404dbf1efa7541059f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7596020008252848908, guid: e45455944dbba404dbf1efa7541059f8, type: 3}
       propertyPath: m_Name
       value: Postagem #0

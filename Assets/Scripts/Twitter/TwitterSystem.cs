@@ -43,6 +43,12 @@ public class TwitterSystem : MonoBehaviour
         infosConta.SetActive(true);
     }
 
+    public void CommentToMain()
+    {
+        comment.SetActive(false);
+        main.SetActive(true);
+    }
+
     public void PostarButton()
     {
         if (String.IsNullOrEmpty(postInput.text)) return;
@@ -186,12 +192,6 @@ public class TwitterSystem : MonoBehaviour
         }
     }
 
-    public void CommentToMain()
-    {
-        comment.SetActive(false);
-        main.SetActive(true);
-    }
-
     public void AddComment(CommentManager script, int id_post, Comment comment, bool @new = false)
     {
         if (ContainsInPost(id_post, comment)) return;
@@ -210,23 +210,12 @@ public class TwitterSystem : MonoBehaviour
 
     public void ShowExistingComments(CommentManager script, int id_post)
     {
-        print("Executando o ShowExistingComments");
         Post[] sArray = new Post[posts.Count];
         posts.CopyTo(sArray, 0);
 
         foreach (var item in sArray)
             if (item.ID == id_post)
-            {
-                Comment[] sArray2 = new Comment[item.Comments.Count];
-                item.Comments.CopyTo(sArray2, 0);
-
-                foreach (var item2 in sArray2)
-                    print(item2.Content);
-                    // script.SetCommentInScreen(sArray2, item2);
-
                 script.SetCommentsInScreen(item.Comments);
-                break;
-            }
     }
 
     public LinkedList<Comment> GetComments(int id_post)
@@ -251,12 +240,7 @@ public class TwitterSystem : MonoBehaviour
                 item.Comments.CopyTo(sArray2, 0);
 
                 foreach (var item2 in sArray2)
-                    if (item2.Comentario != null)
-                    {
-                        print($"Destruindo o objeto do comentário: {item2.Content}");
-                        //Destroy(item2.Comentario.gameObject);
-                        item2.Comentario.gameObject.SetActive(false);
-                    }
+                    item2.Comentario?.gameObject.SetActive(false);
             }
     }
 

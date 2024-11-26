@@ -6,6 +6,7 @@ public class LoginManager : MonoBehaviour
     MySQLConnection conn;
 
     [SerializeField] InputField nicknameInput, passwordInput;
+    [SerializeField] Button loginButton;
     [SerializeField] Text feedback;
     [SerializeField] GameObject infosTela, painelAdmin, criarConta;
 
@@ -26,13 +27,16 @@ public class LoginManager : MonoBehaviour
         nicknameInput.readOnly = true;
         passwordInput.readOnly = true;
         conectando = true;
+        loginButton.interactable = false;
     }
 
     public void ChangeTela()
     {
         nicknameInput.readOnly = false;
         passwordInput.readOnly = false;
+
         conectando = false;
+        loginButton.interactable = true;
 
         passwordInput.text = null;
 

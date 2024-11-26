@@ -92,5 +92,7 @@ public class Postagem : MonoBehaviour
         Atualizar();
     }
 
+    public void DeletarBtn() { }
+
     public void Atualizar() => conn.AtualizarPost(this, 1, post.ID);
 }

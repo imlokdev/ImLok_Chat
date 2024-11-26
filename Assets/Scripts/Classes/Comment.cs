@@ -17,12 +17,7 @@ public class Comment
         Data_pub = data_pub;
     }
 
-    //public void SetClasse(Comentario objeto) => Comentario = objeto;
-    public void SetClasse(Comentario objeto)
-    {
-        Debug.Log($"Setando a classe do comentario: {Content}");
-        Comentario = objeto;
-    }
+    public void SetClasse(Comentario objeto) => Comentario = objeto;
 
     public bool Equals(Comment other)
     {

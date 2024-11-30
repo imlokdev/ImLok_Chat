@@ -6,6 +6,17 @@ public class ShowPassword : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 {
     [SerializeField] InputField passwordInput;
 
+    public void OnValueChanged()
+    {
+        var image = GetComponent<Image>();
+        var temp = image.color;
+
+        if (passwordInput.text.Length > 0) temp.a = 0.5f;
+        else temp.a = 0f;
+
+        image.color = temp;
+    }
+
     public void OnPointerDown(PointerEventData eventData)
     {
         {

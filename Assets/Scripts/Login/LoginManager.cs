@@ -22,7 +22,7 @@ public class LoginManager : MonoBehaviour
         if (conectando) return;
         if (string.IsNullOrEmpty(nicknameInput.text) || string.IsNullOrEmpty(passwordInput.text)) return;
 
-        conn.LoginAccount(nicknameInput.text, passwordInput.text, feedback, this);
+        conn.LoginAccount(this, feedback, nicknameInput.text, passwordInput.text, loginButton);
 
         nicknameInput.readOnly = true;
         passwordInput.readOnly = true;
@@ -80,8 +80,10 @@ public class LoginManager : MonoBehaviour
     private void LembrarUsuario(bool awake = false)
     {
         if (!awake) PlayerPrefs.SetString(key, nicknameInput.text);
-        else if (PlayerPrefs.HasKey(key)) nicknameInput.text = PlayerPrefs.GetString(key);
-
-        passwordInput.Select();
+        else if (PlayerPrefs.HasKey(key))
+        {
+            nicknameInput.text = PlayerPrefs.GetString(key);
+            passwordInput.Select();
+        }
     } 
 }

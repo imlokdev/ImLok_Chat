@@ -12,7 +12,9 @@ public class Postagem : MonoBehaviour
 
     Post post;
     CommentManager commManager;
+    PopUpManager popUpManager;
 
+    [SerializeField] GameObject delete;
     [SerializeField] Image likeImg;
     [SerializeField] Text user, content, likes, comments, timer;
     [SerializeField] Button likeBtn;
@@ -26,7 +28,14 @@ public class Postagem : MonoBehaviour
         conn = TwitterConnection.instance;
         timeCD = Time.time;
         commManager = transform.parent.GetComponent<CommentManager>();
-        if (!CompareTag("Desabilitar")) GetComponent<Button>().onClick.AddListener(() => commManager.OpenPostagem(post));
+        if (!CompareTag("Desabilitar"))
+        {
+            popUpManager = commManager.popUpManager;
+            GetComponent<Button>().onClick.AddListener(() => commManager.OpenPostagem(post));
+
+            Conta conta = AccountManager.instance.Conta;
+            if (post.User == conta.User || conta.IsAdmin) delete.SetActive(true);
+        }
     }
 
     private void Update()
@@ -73,8 +82,8 @@ public class Postagem : MonoBehaviour
     {
         likeBtn.interactable = false;
 
-        if (post.User_liked) conn.Like(this, 1, post.ID, false);
-        else conn.Like(this, 1, post.ID, true);
+        if (post.User_liked) conn.Like(this, post.ID, false);
+        else conn.Like(this, post.ID, true);
     }
 
     public void CommentBtn()
@@ -82,6 +91,8 @@ public class Postagem : MonoBehaviour
         if (CompareTag("Desabilitar")) return;
         commManager.OpenPostagem(post);
     }
+
+    public void DeleteBtn() => popUpManager.SetPost(post);
 
     public void MudarLike(bool state)
     {
@@ -92,7 +103,5 @@ public class Postagem : MonoBehaviour
         Atualizar();
     }
 
-    public void DeletarBtn() { }
-
-    public void Atualizar() => conn.AtualizarPost(this, 1, post.ID);
+    public void Atualizar() => conn.AtualizarPost(this, post.ID);
 }

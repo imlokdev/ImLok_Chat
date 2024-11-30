@@ -19,7 +19,7 @@ public class CreateAccManager : MonoBehaviour
         if (criando) return;
         if (string.IsNullOrEmpty(nicknameInput.text) || string.IsNullOrEmpty(emailInput.text) || string.IsNullOrEmpty(passwordInput.text)) return;
 
-        conn.CreateAccount(nicknameInput.text, emailInput.text, passwordInput.text, feedback, this);
+        conn.CreateAccount(this, feedback, nicknameInput.text, emailInput.text, passwordInput.text);
 
         nicknameInput.readOnly = true;
         emailInput.readOnly = true;
@@ -40,6 +40,15 @@ public class CreateAccManager : MonoBehaviour
 
         gameObject.SetActive(false);
         loginTela.SetActive(true);
+        criando = false;
+    }
+
+    public void ResetInputs()
+    {
+        nicknameInput.readOnly = false;
+        emailInput.readOnly = false;
+        passwordInput.readOnly = false;
+
         criando = false;
     }
 

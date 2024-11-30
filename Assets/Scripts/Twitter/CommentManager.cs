@@ -16,6 +16,7 @@ public class CommentManager : MonoBehaviour
 
     [SerializeField] TwitterSystem twt;
     [SerializeField] Postagem postagem;
+    public PopUpManager popUpManager;
 
     [SerializeField] GameObject main, commentTela, prefab_Comment;
     [SerializeField] Transform canvas;
@@ -54,12 +55,13 @@ public class CommentManager : MonoBehaviour
     {
         JSON json = JSON.ParseString(result);
 
-        int id_post = json.GetInt("id_post");
+        int id = json.GetInt("id"),
+            id_post = json.GetInt("id_post");
         string user = json.GetString("user"),
                content = json.GetString("content");
         DateTime data_pub = DateTime.Parse(json.GetString("data_pub"));
 
-        Comment comment = new(id_post, user, content, data_pub);
+        Comment comment = new(id, id_post, user, content, data_pub);
 
         if (!twt.ContainsInPost(id_post, comment))
         {
@@ -71,6 +73,7 @@ public class CommentManager : MonoBehaviour
         }
 
         commentBtn.interactable = false;
+        postagem.Atualizar();
     }
 
     public void CreateComments(string result)
@@ -79,12 +82,13 @@ public class CommentManager : MonoBehaviour
 
         for (int i = 0; i < json.Length; i++)
         {
-            int id_post = json[i].GetInt("id_post");
+            int id = json[i].GetInt("id"),
+                id_post = json[i].GetInt("id_post");
             string user = json[i].GetString("user"),
                    content = json[i].GetString("content");
             DateTime data_pub = DateTime.Parse(json[i].GetString("data_pub"));
 
-            Comment comment = new(id_post, user, content, data_pub);
+            Comment comment = new(id, id_post, user, content, data_pub);
 
             if (!twt.ContainsInPost(id_post, comment))
             {

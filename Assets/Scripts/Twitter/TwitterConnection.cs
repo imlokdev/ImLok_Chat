@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 
 using Leguar.TotalJSON;
+using static UnityEditor.Progress;
 
 public class TwitterConnection : MonoBehaviour
 {
@@ -37,14 +38,86 @@ public class TwitterConnection : MonoBehaviour
     }
 
     public void NewPost(TwitterSystem script, string content, Button button) => StartCoroutine(CreatePost(script, content, button));
-    public void Posts(TwitterSystem script, int id_user) => StartCoroutine(GetPosts(script, id_user));
-    public void AtualizarPosts(TwitterSystem script, int id_user, int count) => StartCoroutine(UpdateAllPosts(script, id_user, count));
+    public void Posts(TwitterSystem script) => StartCoroutine(GetPosts(script));
+    public void AtualizarPosts(TwitterSystem script, int count) => StartCoroutine(UpdateAllPosts(script, count));
+    public void DeletarPost(PopUpManager script, int id_post, Button[] buttons) => StartCoroutine(DeletePost(script, id_post, buttons));
 
-    public void Like(Postagem script, int id_user, int id_post, bool active) => StartCoroutine(SetLike(script, id_user, id_post, active));
-    public void AtualizarPost(Postagem script, int id_user, int id_post) => StartCoroutine(UpdatePost(script, id_user, id_post));
+    public void Like(Postagem script, int id_post, bool active) => StartCoroutine(SetLike(script, id_post, active));
+    public void AtualizarPost(Postagem script, int id_post) => StartCoroutine(UpdatePost(script, id_post));
 
     public void NewComment(CommentManager script, int id_post, string content, Button button) => StartCoroutine(CreateComment(script, id_post, content, button));
     public void Comments(CommentManager script, int id_post) => StartCoroutine(GetComments(script, id_post));
+    public void DeletarComment(PopUpManager script, int id_comment, Button[] buttons) => StartCoroutine(DeleteComment(script, id_comment, buttons));
+
+    IEnumerator DeletePost(PopUpManager script, int id_post, Button[] buttons)
+    {
+        IDictionary dicio = new Dictionary<string, string>
+        {
+            { "id_user", AccountManager.instance.Conta.ID.ToString() },
+            { "id_post", id_post.ToString() },
+            { "token_acess", AccountManager.instance.Conta.Token_acess }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new UTF8Encoding().GetBytes(json.CreateString());
+        UnityWebRequest request;
+
+        request = new(apiUrl + "delpost", "DELETE")
+        {
+            uploadHandler = new UploadHandlerRaw(jsonToSend),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Erro: " + request.downloadHandler.error);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
+        }
+        else script.DeletarPostagem();
+
+        foreach (var item in buttons)
+            item.interactable = true;
+
+        request.Dispose();
+    }
+
+    IEnumerator DeleteComment(PopUpManager script, int id_comment, Button[] buttons)
+    {
+        IDictionary dicio = new Dictionary<string, string>
+        {
+            { "id_user", AccountManager.instance.Conta.ID.ToString() },
+            { "id_post", id_comment.ToString() },
+            { "token_acess", AccountManager.instance.Conta.Token_acess }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new UTF8Encoding().GetBytes(json.CreateString());
+        UnityWebRequest request;
+
+        request = new(apiUrl + "delcomment", "DELETE")
+        {
+            uploadHandler = new UploadHandlerRaw(jsonToSend),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Erro: " + request.downloadHandler.error);
+            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
+        }
+        else script.DeletarComentario();
+
+        foreach (var item in buttons)
+            item.interactable = true;
+
+        request.Dispose();
+    }
 
     IEnumerator CreateComment(CommentManager script, int id_post, string content, Button button)
     {
@@ -145,9 +218,11 @@ public class TwitterConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator GetPosts(TwitterSystem script, int id_user)
+    IEnumerator GetPosts(TwitterSystem script)
     {
+        int id_user = AccountManager.instance.Conta.ID;
         string token_acess = AccountManager.instance.Conta.Token_acess;
+
         UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall/{token_acess}?id_user={id_user}&count={50}");
         yield return request.SendWebRequest();
 
@@ -166,11 +241,11 @@ public class TwitterConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator SetLike(Postagem script, int id_user, int id_post, bool active)
+    IEnumerator SetLike(Postagem script, int id_post, bool active)
     {
         IDictionary dicio = new Dictionary<string, int>
         {
-            { "id_user", id_user },
+            { "id_user", AccountManager.instance.Conta.ID },
             { "id_post", id_post }
         };
         JSON json = new(dicio);
@@ -214,9 +289,12 @@ public class TwitterConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator UpdatePost(Postagem script, int id_user, int id_post)
+    IEnumerator UpdatePost(Postagem script, int id_post)
     {
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postone?id_user={id_user}&id_post={id_post}");
+        int id_user = AccountManager.instance.Conta.ID;
+        string token_acess = AccountManager.instance.Conta.Token_acess;
+
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postone/{token_acess}?id_user={id_user}&id_post={id_post}");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -233,9 +311,11 @@ public class TwitterConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator UpdateAllPosts(TwitterSystem script, int id_user, int count)
+    IEnumerator UpdateAllPosts(TwitterSystem script, int count)
     {
+        int id_user = AccountManager.instance.Conta.ID;
         string token_acess = AccountManager.instance.Conta.Token_acess;
+
         UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall/{token_acess}?id_user={id_user}&count={count}");
         yield return request.SendWebRequest();
 

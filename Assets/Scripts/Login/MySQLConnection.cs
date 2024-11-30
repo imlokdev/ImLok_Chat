@@ -32,11 +32,11 @@ public class MySQLConnection : MonoBehaviour
         else apiUrl = vercelURL;
     }
 
-    public void CreateAccount(string nome, string email, string password, Text feedback, CreateAccManager script)
-    => StartCoroutine(PostAccount(nome, email, password, feedback, script));
+    public void CreateAccount(CreateAccManager script, Text feedback, string nome, string email, string password)
+    => StartCoroutine(PostAccount(script, feedback, nome, email, password));
 
-    public void LoginAccount(string login, string password, Text feedback, LoginManager script)
-    => StartCoroutine(PostAndGetInfos(login, password, feedback, script));
+    public void LoginAccount(LoginManager script, Text feedback, string login, string password, Button button)
+    => StartCoroutine(PostAndGetInfos(script, feedback, login, password, button));
 
     public void CountAcc(PainelAdminScript script) => StartCoroutine(GetCountAcc(script));
     
@@ -191,7 +191,7 @@ public class MySQLConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator PostAndGetInfos(string user, string password, Text feedback, LoginManager script)
+    IEnumerator PostAndGetInfos(LoginManager script, Text feedback, string user, string password, Button button)
     {
         feedback.text = null;
         IDictionary dicio = new Dictionary<string, string>
@@ -243,10 +243,12 @@ public class MySQLConnection : MonoBehaviour
             script.ChangeTela();
         }
 
+        button.interactable = true;
+
         request.Dispose();
     }
 
-    IEnumerator PostAccount(string nome, string email, string password, Text feedback, CreateAccManager script)
+    IEnumerator PostAccount(CreateAccManager script, Text feedback, string nome, string email, string password)
     {
         feedback.text = null;
         IDictionary dicio = new Dictionary<string, string>
@@ -280,6 +282,8 @@ public class MySQLConnection : MonoBehaviour
             feedback.color = Color.green;
             script.ChangeTela();
         }
+
+        script.ResetInputs();
 
         request.Dispose();
     }

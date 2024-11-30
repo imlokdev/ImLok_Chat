@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1372723912037086290
 RectTransform:
   m_ObjectHideFlags: 0
@@ -36,7 +36,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 516.6, y: 85.4}
+  m_AnchoredPosition: {x: 501.33, y: 79.126}
   m_SizeDelta: {x: 23.747, y: 23.748}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8031112737005499545
@@ -123,7 +123,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5518777624364642837}
         m_TargetAssemblyTypeName: Postagem, Assembly-CSharp
-        m_MethodName: DeletarBtn
+        m_MethodName: DeleteBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -650,6 +650,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffd775dcd13c93443a64459007a8ffd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  delete: {fileID: 2933829672580339651}
   likeImg: {fileID: 7596020009240478682}
   user: {fileID: 7596020007518211763}
   content: {fileID: 7596020007948659489}

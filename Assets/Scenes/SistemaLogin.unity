@@ -2049,11 +2049,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 953070842ca32bf4f9ebfa1fef076f43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loginTela: {fileID: 169724792}
+  feedback: {fileID: 586715342}
+  createBtn: {fileID: 1232246151}
   nicknameInput: {fileID: 2062321044}
   emailInput: {fileID: 1278430277}
   passwordInput: {fileID: 1130055224}
-  feedback: {fileID: 586715342}
-  loginTela: {fileID: 169724792}
 --- !u!1 &322871741
 GameObject:
   m_ObjectHideFlags: 0

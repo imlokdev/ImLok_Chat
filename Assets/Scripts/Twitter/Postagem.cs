@@ -42,7 +42,7 @@ public class Postagem : MonoBehaviour
     {
         if (Time.time -  timeCD > timeUpdateDatetime)
         {
-            timer.text = Tools.DateTimeToTimer(post.Data_pub);
+            timer.text = Tools.DateTimeToTimer(post.Data_pub, post.Horario);
             timeCD = Time.time;
         }
     }
@@ -55,7 +55,7 @@ public class Postagem : MonoBehaviour
         content.text = post.Content;
         likes.text = post.Total_likes.ToString();
         comments.text = post.Total_comments.ToString();
-        timer.text = Tools.DateTimeToTimer(post.Data_pub);
+        timer.text = Tools.DateTimeToTimer(post.Data_pub, post.Horario);
 
         if (post.User_liked) likeImg.sprite = likePreenchido;
         else likeImg.sprite = likeVazio;
@@ -70,10 +70,11 @@ public class Postagem : MonoBehaviour
                 total_comments = json.GetInt("total_comments");
         string user = json.GetString("user"),
                content = json.GetString("content");
-        DateTime data_pub = DateTime.Parse(json.GetString("data_pub"));
+        DateTime data_pub = DateTime.Parse(json.GetString("data_pub")),
+                 horario = DateTime.Parse(json.GetString("horario"));
         bool user_liked = json.GetInt("user_liked") == 1;
 
-        SetInfos(new(id, user, content, data_pub, total_likes, total_comments, user_liked));
+        SetInfos(new(id, user, content, data_pub,  horario, total_likes, total_comments, user_liked));
     }
 
     public void UpdateInfos(Post post) => SetInfos(post);
@@ -82,8 +83,8 @@ public class Postagem : MonoBehaviour
     {
         likeBtn.interactable = false;
 
-        if (post.User_liked) conn.Like(this, post.ID, false);
-        else conn.Like(this, post.ID, true);
+        if (post.User_liked) conn.Like(this, post.ID, false, likeBtn);
+        else conn.Like(this, post.ID, true, likeBtn);
     }
 
     public void CommentBtn()

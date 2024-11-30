@@ -42,7 +42,7 @@ public class TwitterConnection : MonoBehaviour
     public void AtualizarPosts(TwitterSystem script, int count) => StartCoroutine(UpdateAllPosts(script, count));
     public void DeletarPost(PopUpManager script, int id_post, Button[] buttons) => StartCoroutine(DeletePost(script, id_post, buttons));
 
-    public void Like(Postagem script, int id_post, bool active) => StartCoroutine(SetLike(script, id_post, active));
+    public void Like(Postagem script, int id_post, bool active, Button button) => StartCoroutine(SetLike(script, id_post, active, button));
     public void AtualizarPost(Postagem script, int id_post) => StartCoroutine(UpdatePost(script, id_post));
 
     public void NewComment(CommentManager script, int id_post, string content, Button button) => StartCoroutine(CreateComment(script, id_post, content, button));
@@ -232,21 +232,18 @@ public class TwitterConnection : MonoBehaviour
             Debug.LogError("Nenhum post encontrado.");
             sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
-        else
-        {
-            var resultado = request.downloadHandler.text;
-            script.CriarPosts(resultado);
-        }
+        else script.CriarPosts(request.downloadHandler.text);
 
         request.Dispose();
     }
 
-    IEnumerator SetLike(Postagem script, int id_post, bool active)
+    IEnumerator SetLike(Postagem script, int id_post, bool active, Button button)
     {
-        IDictionary dicio = new Dictionary<string, int>
+        IDictionary dicio = new Dictionary<string, string>
         {
-            { "id_user", AccountManager.instance.Conta.ID },
-            { "id_post", id_post }
+            { "id_user", AccountManager.instance.Conta.ID.ToString() },
+            { "id_post", id_post.ToString() },
+            { "token_acess", AccountManager.instance.Conta.Token_acess }
         };
         JSON json = new(dicio);
         byte[] jsonToSend = new UTF8Encoding().GetBytes(json.CreateString());
@@ -286,6 +283,8 @@ public class TwitterConnection : MonoBehaviour
             script.MudarLike(state);
         }
 
+        button.interactable = true;
+
         request.Dispose();
     }
 
@@ -302,11 +301,7 @@ public class TwitterConnection : MonoBehaviour
             Debug.LogError("Erro: " + request.error);
             Debug.LogError("Post não encontrado.");
         }
-        else
-        {
-            var resultado = request.downloadHandler.text;
-            script.UpdateInfos(resultado);
-        }
+        else script.UpdateInfos(request.downloadHandler.text);
 
         request.Dispose();
     }
@@ -322,14 +317,9 @@ public class TwitterConnection : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Erro: " + request.error);
-            Debug.LogError("Nenhum post encontrado.");
             sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
-        else
-        {
-            var resultado = request.downloadHandler.text;
-            script.UpdateAllPosts(resultado);
-        }
+        else script.UpdateAllPosts(request.downloadHandler.text);
 
         request.Dispose();
     }

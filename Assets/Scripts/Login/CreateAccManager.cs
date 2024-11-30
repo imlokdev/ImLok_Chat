@@ -5,10 +5,11 @@ public class CreateAccManager : MonoBehaviour
 {
     MySQLConnection conn;
 
-    [SerializeField] InputField nicknameInput, emailInput, passwordInput;
-    [SerializeField] Text feedback;
     [SerializeField] GameObject loginTela;
-
+    [SerializeField] Text feedback;
+    [SerializeField] Button createBtn;
+    [SerializeField] InputField nicknameInput, emailInput, passwordInput;
+    
     bool criando;
 
     private void Start() => conn = MySQLConnection.instance;
@@ -26,6 +27,7 @@ public class CreateAccManager : MonoBehaviour
         passwordInput.readOnly = true;
 
         criando = true;
+        createBtn.interactable = false;
     }
 
     public void ChangeTela()
@@ -48,6 +50,8 @@ public class CreateAccManager : MonoBehaviour
         nicknameInput.readOnly = false;
         emailInput.readOnly = false;
         passwordInput.readOnly = false;
+
+        createBtn.interactable = true;
 
         criando = false;
     }

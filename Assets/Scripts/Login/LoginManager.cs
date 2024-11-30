@@ -22,7 +22,7 @@ public class LoginManager : MonoBehaviour
         if (conectando) return;
         if (string.IsNullOrEmpty(nicknameInput.text) || string.IsNullOrEmpty(passwordInput.text)) return;
 
-        conn.LoginAccount(this, feedback, nicknameInput.text, passwordInput.text, loginButton);
+        conn.LoginAccount(this, feedback, nicknameInput.text, passwordInput.text);
 
         nicknameInput.readOnly = true;
         passwordInput.readOnly = true;
@@ -45,6 +45,17 @@ public class LoginManager : MonoBehaviour
         gameObject.SetActive(false);
         infosTela.SetActive(true);
         painelAdmin.SetActive(AccountManager.instance.Conta.IsAdmin);
+    }
+
+    public void ResetInputs()
+    {
+        nicknameInput.readOnly = false;
+        passwordInput.readOnly = false;
+
+        conectando = false;
+        loginButton.interactable = true;
+
+        passwordInput.text = null;
     }
 
     public void CriarConta()

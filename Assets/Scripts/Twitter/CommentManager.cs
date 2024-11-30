@@ -34,6 +34,9 @@ public class CommentManager : MonoBehaviour
         content.sizeDelta = Vector2.zero;
         twt.ClearCommentsObjects();
 
+        print("OpenPostagem");
+        print(post.ToString());
+
         postagem.SetInfos(post);
         twt.ShowExistingComments(this, post.ID);
         conn.Comments(this, post.ID);
@@ -59,9 +62,10 @@ public class CommentManager : MonoBehaviour
             id_post = json.GetInt("id_post");
         string user = json.GetString("user"),
                content = json.GetString("content");
-        DateTime data_pub = DateTime.Parse(json.GetString("data_pub"));
+        DateTime data_pub = DateTime.Parse(json.GetString("data_pub")),
+                 horario = DateTime.Parse(json.GetString("horario"));
 
-        Comment comment = new(id, id_post, user, content, data_pub);
+        Comment comment = new(id, id_post, user, content, data_pub, horario);
 
         if (!twt.ContainsInPost(id_post, comment))
         {
@@ -86,9 +90,10 @@ public class CommentManager : MonoBehaviour
                 id_post = json[i].GetInt("id_post");
             string user = json[i].GetString("user"),
                    content = json[i].GetString("content");
-            DateTime data_pub = DateTime.Parse(json[i].GetString("data_pub"));
+            DateTime data_pub = DateTime.Parse(json[i].GetString("data_pub")),
+                     horario = DateTime.Parse(json[i].GetString("horario")); ;
 
-            Comment comment = new(id, id_post, user, content, data_pub);
+            Comment comment = new(id, id_post, user, content, data_pub, horario);
 
             if (!twt.ContainsInPost(id_post, comment))
             {

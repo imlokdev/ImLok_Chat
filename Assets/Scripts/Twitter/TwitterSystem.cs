@@ -72,10 +72,11 @@ public class TwitterSystem : MonoBehaviour
                 total_comments = json[i].GetInt("total_comments");
             string user = json[i].GetString("user"),
                    content = json[i].GetString("content");
-            DateTime data_pub = DateTime.Parse(json[i].GetString("data_pub"));
+            DateTime data_pub = DateTime.Parse(json[i].GetString("data_pub")),
+                     horario = DateTime.Parse(json[i].GetString("horario")); ;
             bool user_liked = json[i].GetInt("user_liked") == 1;
 
-            Post post = new(id, user, content, data_pub, total_likes, total_comments, user_liked);
+            Post post = new(id, user, content, data_pub, horario, total_likes, total_comments, user_liked);
             
             posts.AddLast(post);
         }
@@ -141,10 +142,11 @@ public class TwitterSystem : MonoBehaviour
                 total_comments = json.GetInt("total_comments");
         string user = json.GetString("user"),
                content = json.GetString("content");
-        DateTime data_pub = DateTime.Parse(json.GetString("data_pub"));
+        DateTime data_pub = DateTime.Parse(json.GetString("data_pub")),
+                 horario = DateTime.Parse(json.GetString("horario"));
         bool user_liked = json.GetInt("user_liked") == 1;
 
-        Post post = new(id, user, content, data_pub, total_likes, total_comments, user_liked);
+        Post post = new(id, user, content, data_pub, horario, total_likes, total_comments, user_liked);
 
         posts.AddFirst(post);
         SetNewPostTela(post);
@@ -196,11 +198,13 @@ public class TwitterSystem : MonoBehaviour
             int id = json[i].GetInt("id"),
                 total_likes = json[i].GetInt("total_likes"),
                 total_comments = json[i].GetInt("total_comments");
+            bool user_liked = json[i].GetInt("user_liked") == 1;
+            DateTime horario = DateTime.Parse(json[i].GetString("horario"));
 
             for (int j = 0; j < sArray.Length; j++)
                 if (sArray[j].ID == id)
                 {
-                    sArray[j].UpdateInfos(total_likes, total_comments);
+                    sArray[j].UpdateInfos(total_likes, total_comments, user_liked, horario);
                     break;
                 }
         }

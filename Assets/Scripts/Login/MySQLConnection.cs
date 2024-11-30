@@ -35,8 +35,8 @@ public class MySQLConnection : MonoBehaviour
     public void CreateAccount(CreateAccManager script, Text feedback, string nome, string email, string password)
     => StartCoroutine(PostAccount(script, feedback, nome, email, password));
 
-    public void LoginAccount(LoginManager script, Text feedback, string login, string password, Button button)
-    => StartCoroutine(PostAndGetInfos(script, feedback, login, password, button));
+    public void LoginAccount(LoginManager script, Text feedback, string login, string password)
+    => StartCoroutine(PostAndGetInfos(script, feedback, login, password));
 
     public void CountAcc(PainelAdminScript script) => StartCoroutine(GetCountAcc(script));
     
@@ -191,7 +191,7 @@ public class MySQLConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator PostAndGetInfos(LoginManager script, Text feedback, string user, string password, Button button)
+    IEnumerator PostAndGetInfos(LoginManager script, Text feedback, string user, string password)
     {
         feedback.text = null;
         IDictionary dicio = new Dictionary<string, string>
@@ -243,7 +243,7 @@ public class MySQLConnection : MonoBehaviour
             script.ChangeTela();
         }
 
-        button.interactable = true;
+        script.ResetInputs();
 
         request.Dispose();
     }

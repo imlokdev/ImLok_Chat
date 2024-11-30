@@ -134,9 +134,9 @@ public class Tools
         return temp;
     }
 
-    public static string DateTimeToTimer(DateTime data_pub)
+    public static string DateTimeToTimer(DateTime data_pub, DateTime horario)
     {
-        TimeSpan interval = DateTime.Now - data_pub;
+        TimeSpan interval = horario - data_pub;
 
         if (interval.TotalDays >= 365)
             return $"{data_pub.Day} {data_pub.ToString("MMM", new CultureInfo("pt-BR"))} {data_pub.Year}";
@@ -146,7 +146,7 @@ public class Tools
             return $"{interval.Hours} h";
         if (interval.TotalMinutes >= 1)
             return $"{interval.Minutes} min";
-        if (interval.TotalSeconds > 0)
+        if (interval.TotalSeconds >= 0)
             return $"{interval.Seconds} s";
         return null;
     }

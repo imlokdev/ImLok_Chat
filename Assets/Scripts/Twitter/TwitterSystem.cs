@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
-using UnityEditor.Experimental.GraphView;
-using static UnityEditor.ShaderData;
 
 public class TwitterSystem : MonoBehaviour
 {
@@ -88,12 +86,6 @@ public class TwitterSystem : MonoBehaviour
 
     private void SetPostsTela()
     {
-        int totalPosts = posts.Count;
-        float tamanhoContent = totalPosts * 200f;
-        float posY = tamanhoContent / 2 - 100f;
-
-        content.sizeDelta = new(0, tamanhoContent);
-
         Post[] sArray = new Post[posts.Count];
         posts.CopyTo(sArray, 0);
 
@@ -103,7 +95,6 @@ public class TwitterSystem : MonoBehaviour
 
             var temp = Instantiate(prefab_Post, canvas);
             temp.transform.SetParent(content);
-            temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
 
             var classe = temp.GetComponent<Postagem>();
             classe.SetInfos(post);
@@ -111,28 +102,9 @@ public class TwitterSystem : MonoBehaviour
             post.SetClasse(classe);
 
             if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
-
-            posY -= 200f;
         }
-    }
 
-    private void OrganizarPostsTela()
-    {
-        int totalPosts = posts.Count;
-        float tamanhoContent = totalPosts * 200f;
-        float posY = tamanhoContent / 2 - 100f;
-
-        content.sizeDelta = new(0, tamanhoContent);
-
-        Post[] sArray = new Post[posts.Count];
-        posts.CopyTo(sArray, 0);
-
-        for (int i = 0; i < posts.Count; i++)
-        {
-            Post post = sArray[i];
-            post.Postagem.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
-            posY -= 200f;
-        }
+        OrganizarPostsTela();
     }
 
     public void CriarPost(string result)
@@ -156,6 +128,31 @@ public class TwitterSystem : MonoBehaviour
 
     private void SetNewPostTela(Post post)
     {
+        Post[] sArray = new Post[posts.Count];
+        posts.CopyTo(sArray, 0);
+
+        for (int i = 0; i < posts.Count; i++)
+        {
+            if (sArray[i] == sArray[0])
+            {
+                var temp = Instantiate(prefab_Post, canvas);
+                temp.transform.SetParent(content);
+
+                var classe = temp.GetComponent<Postagem>();
+                classe.SetInfos(post);
+
+                sArray[i].SetClasse(classe);
+
+                if (newPosts > 0 && newPosts % 2 != 0) temp.GetComponent<Image>().color = Color.gray;
+            }
+        }
+
+        newPosts++;
+        OrganizarPostsTela();
+    }
+
+    private void OrganizarPostsTela()
+    {
         int totalPosts = posts.Count;
         float tamanhoContent = totalPosts * 200f;
         float posY = tamanhoContent / 2 - 100f;
@@ -167,25 +164,10 @@ public class TwitterSystem : MonoBehaviour
 
         for (int i = 0; i < posts.Count; i++)
         {
-            if (sArray[i] == sArray[0])
-            {
-                var temp = Instantiate(prefab_Post, canvas);
-                temp.transform.SetParent(content);
-                temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
-
-                var classe = temp.GetComponent<Postagem>();
-                classe.SetInfos(post);
-
-                sArray[i].SetClasse(classe);
-
-                if (newPosts > 0 && newPosts % 2 != 0) temp.GetComponent<Image>().color = Color.gray;
-            }
-            else sArray[i].Postagem.gameObject.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
-
+            Post post = sArray[i];
+            post.Postagem.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
             posY -= 200f;
         }
-
-        newPosts++;
     }
 
     public void UpdateAllPosts(string result)
@@ -239,8 +221,7 @@ public class TwitterSystem : MonoBehaviour
 
     public void DeletePost(Post post)
     {
-        if (!posts.Find(post).Value.Equals(posts.First.Value))
-            posts.Find(post).Previous.Value.Postagem.GetComponent<Image>().color = post.Postagem.GetComponent<Image>().color;
+        RecolorirPosts(posts.Find(post));
         posts.Remove(post);
         Destroy(post.Postagem.gameObject);
         OrganizarPostsTela();
@@ -253,9 +234,13 @@ public class TwitterSystem : MonoBehaviour
 
         foreach (var item in sArray)
             if (item.ID == comment.ID_post)
+            {
+                RecolorirComments(item.Comments, item.Comments.Find(comment));
                 item.Comments.Remove(comment);
+                //OrganizarCommentsTela(item.Comments);
+            }
+
         Destroy(comment.Comentario.gameObject);
-        //OrganizarPostsTela();
     }
 
     public void ShowExistingComments(CommentManager script, int id_post)
@@ -309,5 +294,19 @@ public class TwitterSystem : MonoBehaviour
                     if (item2.Equals(comment)) return true;
             }
         return false;
+    }
+
+    private void RecolorirPosts(LinkedListNode<Post> node, bool inside = false)
+    {
+        if (node != posts.Last) RecolorirPosts(node.Next, true);
+
+        if (inside) node.Value.Postagem.GetComponent<Image>().color = node.Previous.Value.Postagem.GetComponent<Image>().color;
+    }
+
+    private void RecolorirComments(LinkedList<Comment> lista, LinkedListNode<Comment> node, bool inside = false)
+    {
+        if (node != lista.Last) RecolorirComments(lista, node.Next, true);
+
+        if (inside) node.Value.Comentario.GetComponent<Image>().color = node.Previous.Value.Comentario.GetComponent<Image>().color;
     }
 }

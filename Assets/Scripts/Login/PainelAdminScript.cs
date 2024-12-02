@@ -110,7 +110,7 @@ public class PainelAdminScript : MonoBehaviour
 
     public void SetContas(string result)
     {
-        JSON[] json = JSON.ParseStringToMultiple(Api2Json(result));
+        JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
 
         for (int i = 0; i < json.Length; i++)
         {
@@ -128,29 +128,6 @@ public class PainelAdminScript : MonoBehaviour
             SetContaTela(i, conta.ID, conta.User, conta.Email, conta.IsBlocked, conta.IsAdmin, conta.IsBanned, conta.IsConfirmed);
             contas[id - 1] = conta;
         }
-    }
-
-    private string Api2Json(string apiString)
-    {
-        var temp = apiString.Replace("[", "").Replace("]", "").Trim();
-
-        while (true)
-        {
-            int index = -1;
-
-            for (int i = 0; i < temp.Length; i++)
-                if (i + 1 < temp.Length)
-                    if (temp[i] == '}' && temp[i + 1] == ',')
-                    {
-                        index = i + 1;
-                        break;
-                    }
-
-            if (index < 0) break;
-            else temp = temp.Remove(index, 1);
-        }
-
-         return temp;
     }
 
     private void SetContaTela(int index, int id, string user, string email, bool isBlocked, bool isAdmin, bool isBanned, bool isConfirmed)

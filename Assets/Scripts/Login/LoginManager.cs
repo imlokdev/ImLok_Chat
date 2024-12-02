@@ -15,7 +15,6 @@ public class LoginManager : MonoBehaviour
 
     private void Awake() => LembrarUsuario(true);
     private void Start() => conn = MySQLConnection.instance;
-    private void Update() => Controles();
 
     public void EntrarConta()
     {
@@ -76,17 +75,14 @@ public class LoginManager : MonoBehaviour
         passwordInput.text = temp;
     }
 
-    private void Controles()
+    public void Tab()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            if (nicknameInput.isFocused) passwordInput.Select();
-            else if (passwordInput.isFocused) nicknameInput.Select();
-            else nicknameInput.Select();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Return)) EntrarConta();
+        if (nicknameInput.isFocused) passwordInput.Select();
+        else if (passwordInput.isFocused) nicknameInput.Select();
+        else nicknameInput.Select();
     }
+
+    public void Esc() => Application.Quit();
 
     private void LembrarUsuario(bool awake = false)
     {

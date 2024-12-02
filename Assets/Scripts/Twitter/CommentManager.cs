@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
-using Unity.VisualScripting;
-using System.Xml.Linq;
 
 public class CommentManager : MonoBehaviour
 {
@@ -33,9 +31,6 @@ public class CommentManager : MonoBehaviour
 
         content.sizeDelta = Vector2.zero;
         twt.ClearCommentsObjects();
-
-        print("OpenPostagem");
-        print(post.ToString());
 
         postagem.SetInfos(post);
         twt.ShowExistingComments(this, post.ID);

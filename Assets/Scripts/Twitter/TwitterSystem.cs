@@ -12,7 +12,7 @@ public class TwitterSystem : MonoBehaviour
 {
     TwitterConnection conn;
 
-    [SerializeField] GameObject infosConta, prefab_Post, main, comment;
+    [SerializeField] GameObject infosConta, prefab_Post, main, comment, popUp;
     [SerializeField] RectTransform content, canvas;
     [SerializeField] InputField postInput;
     [SerializeField] Button postBtn;
@@ -42,6 +42,7 @@ public class TwitterSystem : MonoBehaviour
 
     public void ContaButton()
     {
+        if (popUp.activeSelf) return;
         gameObject.SetActive(false);
         infosConta.SetActive(true);
     }
@@ -54,6 +55,7 @@ public class TwitterSystem : MonoBehaviour
 
     public void PostarButton()
     {
+        if (popUp.activeSelf) return;
         if (String.IsNullOrEmpty(postInput.text)) return;
 
         postBtn.interactable = false;
@@ -237,7 +239,8 @@ public class TwitterSystem : MonoBehaviour
 
     public void DeletePost(Post post)
     {
-        posts.Find(post).Previous.Value.Postagem.GetComponent<Image>().color = post.Postagem.GetComponent<Image>().color;
+        if (!posts.Find(post).Value.Equals(posts.First.Value))
+            posts.Find(post).Previous.Value.Postagem.GetComponent<Image>().color = post.Postagem.GetComponent<Image>().color;
         posts.Remove(post);
         Destroy(post.Postagem.gameObject);
         OrganizarPostsTela();

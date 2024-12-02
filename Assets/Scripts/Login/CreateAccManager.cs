@@ -13,7 +13,6 @@ public class CreateAccManager : MonoBehaviour
     bool criando;
 
     private void Start() => conn = MySQLConnection.instance;
-    private void Update() => Controles();
 
     public void CriarConta()
     {
@@ -56,16 +55,11 @@ public class CreateAccManager : MonoBehaviour
         criando = false;
     }
 
-    private void Controles()
+    public void Tab()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            if (nicknameInput.isFocused) emailInput.Select();
-            else if (emailInput.isFocused) passwordInput.Select();
-            else if (passwordInput.isFocused) nicknameInput.Select();
-            else nicknameInput.Select();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Return)) CriarConta();
+        if (nicknameInput.isFocused) emailInput.Select();
+        else if (emailInput.isFocused) passwordInput.Select();
+        else if (passwordInput.isFocused) nicknameInput.Select();
+        else nicknameInput.Select();
     }
 }

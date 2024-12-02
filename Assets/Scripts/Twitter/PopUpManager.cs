@@ -21,6 +21,8 @@ public class PopUpManager : MonoBehaviour
 
     public void CancelBtn()
     {
+        if ((post != null || comment != null) && choice == Publi.None) return;
+
         gameObject.SetActive(false);
         post = null;
         comment = null;

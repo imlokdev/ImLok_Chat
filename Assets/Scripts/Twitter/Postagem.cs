@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +8,7 @@ using Leguar.TotalJSON;
 public class Postagem : MonoBehaviour
 {
     TwitterConnection conn;
+    TwitterSystem twitterSystem;
 
     Post post;
     CommentManager commManager;
@@ -20,7 +20,7 @@ public class Postagem : MonoBehaviour
     [SerializeField] Button likeBtn;
     [SerializeField] Sprite likeVazio, likePreenchido;
 
-    public float timeUpdateDatetime = 10f;
+    public float timeUpdate = 10f;
     private float timeCD;
 
     private void Start()
@@ -40,11 +40,21 @@ public class Postagem : MonoBehaviour
 
     private void Update()
     {
-        if (Time.time -  timeCD > timeUpdateDatetime)
+        if (Time.time -  timeCD > timeUpdate)
         {
-            timer.text = Tools.DateTimeToTimer(post.Data_pub, post.Horario);
+            Atualizar();
             timeCD = Time.time;
         }
+    }
+
+    public void AutoDeletePost(string result, long httpcode)
+    {
+        if (httpcode != 500) return;
+
+        JSON json = JSON.ParseString(result);
+
+        if (json.GetString("error").Contains("foreign key") || json.GetString("state") == "deleted")
+            twitterSystem.DeletePost(post);
     }
 
     public void SetInfos(Post _post)
@@ -61,20 +71,30 @@ public class Postagem : MonoBehaviour
         else likeImg.sprite = likeVazio;
     }
 
+    public void SetInfos(int total_likes, int total_comments, DateTime horario, bool user_liked)
+    {
+        post.UpdateInfos(total_likes, total_comments, user_liked, horario);
+
+        likes.text = post.Total_likes.ToString();
+        comments.text = post.Total_comments.ToString();
+        timer.text = Tools.DateTimeToTimer(post.Data_pub, post.Horario);
+
+        if (post.User_liked) likeImg.sprite = likePreenchido;
+        else likeImg.sprite = likeVazio;
+    }
+
+    public void SetScript(TwitterSystem script) => twitterSystem = script;
+
     public void UpdateInfos(string infos)
     {
         JSON json = JSON.ParseString(Tools.Api2Json(infos));
 
-        int id = json.GetInt("id"),
-                total_likes = json.GetInt("total_likes"),
-                total_comments = json.GetInt("total_comments");
-        string user = json.GetString("user"),
-               content = json.GetString("content");
-        DateTime data_pub = DateTime.Parse(json.GetString("data_pub")),
-                 horario = DateTime.Parse(json.GetString("horario"));
+        int total_likes = json.GetInt("total_likes"),
+            total_comments = json.GetInt("total_comments");
+        DateTime horario = DateTime.Parse(json.GetString("horario"));
         bool user_liked = json.GetInt("user_liked") == 1;
 
-        SetInfos(new(id, user, content, data_pub,  horario, total_likes, total_comments, user_liked));
+        SetInfos(total_likes, total_comments, horario, user_liked);
     }
 
     public void UpdateInfos(Post post) => SetInfos(post);

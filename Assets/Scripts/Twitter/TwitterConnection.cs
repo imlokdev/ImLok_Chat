@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 
 using Leguar.TotalJSON;
-using static UnityEditor.Progress;
 
 public class TwitterConnection : MonoBehaviour
 {
@@ -272,8 +271,9 @@ public class TwitterConnection : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Erro: " + request.downloadHandler.error);
-            sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
+            var resultado = request.downloadHandler.text;
+            script.AutoDeletePost(resultado, request.responseCode);
+            sessionManager.FinalizarSessao(resultado, request.responseCode);
         }
         else
         {
@@ -300,6 +300,9 @@ public class TwitterConnection : MonoBehaviour
         {
             Debug.LogError("Erro: " + request.error);
             Debug.LogError("Post não encontrado.");
+            var resultado = request.downloadHandler.text;
+            script.AutoDeletePost(resultado, request.responseCode);
+            sessionManager.FinalizarSessao(resultado, request.responseCode);
         }
         else script.UpdateInfos(request.downloadHandler.text);
 

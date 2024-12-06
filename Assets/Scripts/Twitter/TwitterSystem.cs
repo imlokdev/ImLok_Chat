@@ -38,6 +38,9 @@ public class TwitterSystem : MonoBehaviour
         }
     }
 
+    public int GetCountPosts() => posts.Count;
+    public Post GetFirstPost() => posts.First.Value;
+
     public void ContaButton()
     {
         if (popUp.activeSelf) return;
@@ -97,8 +100,9 @@ public class TwitterSystem : MonoBehaviour
             temp.transform.SetParent(content);
 
             var classe = temp.GetComponent<Postagem>();
-            classe.SetInfos(post);
 
+            classe.SetInfos(post);
+            classe.SetScript(this);
             post.SetClasse(classe);
 
             if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
@@ -225,6 +229,9 @@ public class TwitterSystem : MonoBehaviour
         posts.Remove(post);
         Destroy(post.Postagem.gameObject);
         OrganizarPostsTela();
+
+        comment.SetActive(false);
+        main.SetActive(true);
     }
 
     public void DeleteComment(Comment comment)

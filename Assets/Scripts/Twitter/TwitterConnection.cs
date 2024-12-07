@@ -36,9 +36,11 @@ public class TwitterConnection : MonoBehaviour
         else apiUrl = vercelURL;
     }
 
+    public void CancelarUpdate() => StopCoroutine(nameof(UpdateAllPosts));
+
     public void NewPost(TwitterSystem script, string content, Button button) => StartCoroutine(CreatePost(script, content, button));
     public void Posts(TwitterSystem script) => StartCoroutine(GetPosts(script));
-    public void AtualizarPosts(TwitterSystem script, int count) => StartCoroutine(UpdateAllPosts(script, count));
+    public void AtualizarPosts(TwitterSystem script) => StartCoroutine(UpdateAllPosts(script));
     public void DeletarPost(PopUpManager script, int id_post, Button[] buttons) => StartCoroutine(DeletePost(script, id_post, buttons));
 
     public void Like(Postagem script, int id_post, bool active, Button button) => StartCoroutine(SetLike(script, id_post, active, button));
@@ -298,9 +300,11 @@ public class TwitterConnection : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Erro: " + request.error);
-            Debug.LogError("Post não encontrado.");
             var resultado = request.downloadHandler.text;
+
+            Debug.LogError("Erro: " + resultado);
+            Debug.LogError($"Post ID: {id_post} não encontrado.");
+
             script.AutoDeletePost(resultado, request.responseCode);
             sessionManager.FinalizarSessao(resultado, request.responseCode);
         }
@@ -309,17 +313,35 @@ public class TwitterConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator UpdateAllPosts(TwitterSystem script, int count)
+    IEnumerator UpdateAllPosts(TwitterSystem script)
     {
         int id_user = AccountManager.instance.Conta.ID;
         string token_acess = AccountManager.instance.Conta.Token_acess;
 
-        UnityWebRequest request = UnityWebRequest.Get(apiUrl + $"postsall/{token_acess}?id_user={id_user}&count={count}");
+        IDictionary dicio = new Dictionary<string, string>
+        {
+            { "id_user", id_user.ToString() },
+            { "id_first_post", script.GetFirstPost().ID.ToString() },
+            { "id_last_post", script.GetLastPost().ID.ToString() },
+            { "token_acess", token_acess }
+        };
+        JSON json = new(dicio);
+        byte[] jsonToSend = new UTF8Encoding().GetBytes(json.CreateString());
+        UnityWebRequest request;
+
+        request = new(apiUrl + "updateall", "POST")
+        {
+            uploadHandler = new UploadHandlerRaw(jsonToSend),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Erro: " + request.error);
+            Debug.LogError("Erro: " + request.downloadHandler.text);
             sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
         else script.UpdateAllPosts(request.downloadHandler.text);

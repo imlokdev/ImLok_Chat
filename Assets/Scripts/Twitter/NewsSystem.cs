@@ -1,9 +1,9 @@
+using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
-using System.Collections.Generic;
-using System;
 
 public class NewsSystem : MonoBehaviour
 {
@@ -11,12 +11,14 @@ public class NewsSystem : MonoBehaviour
 
     TwitterSystem twitterSystem;
 
+    [SerializeField] RectTransform objeto, scrollView;
     [SerializeField] Text newPostsText;
 
     readonly LinkedList<Post> newPosts = new();
 
     public float timeUpdate = 15f;
     private float timeCD;
+    private bool actived;
 
     private void Start()
     {
@@ -41,22 +43,70 @@ public class NewsSystem : MonoBehaviour
 
         for (int i = 0; i < json.Length; i++)
         {
-            int id = json[i].GetInt("id"),
-                total_likes = json[i].GetInt("total_likes"),
-                total_comments = json[i].GetInt("total_comments");
-            string user = json[i].GetString("user"),
-                   content = json[i].GetString("content");
-            DateTime data_pub = DateTime.Parse(json[i].GetString("data_pub")),
-                     horario = DateTime.Parse(json[i].GetString("horario")); ;
-            bool user_liked = json[i].GetInt("user_liked") == 1;
-
-            Post post = new(id, user, content, data_pub, horario, total_likes, total_comments, user_liked);
-
+            Post post = Tools.ApiToPost(json[i]);
             newPosts.AddLast(post);
         }
 
-        ShowNewPosts(json.Length);
+        if (json.Length > 0)
+        {
+            newPostsText.text = $"Mostrar {json.Length} posts";
+            MoveScrollView(true);
+        }
     }
 
-    private void ShowNewPosts(int count) => newPostsText.text = $"Mostrar {count} posts";
+    public void NewButton()
+    {
+        twitterSystem.CancelarUpdate();
+        MoveScrollView(false);
+
+        Post[] sArray = new Post[newPosts.Count];
+        newPosts.CopyTo(sArray, 0);
+
+        foreach (var item in sArray)
+            twitterSystem.CriarPost(item);
+
+        newPosts.Clear();
+    }
+
+    private void MoveScrollView(bool active)
+    {
+        if (!actived && active)
+        {
+            actived = active;
+
+            {
+                var temp = scrollView.anchoredPosition;
+                temp.y -= objeto.sizeDelta.y;
+
+                scrollView.anchoredPosition = temp;
+            }
+
+            {
+                var temp = scrollView.sizeDelta;
+                temp.y -= objeto.sizeDelta.y;
+
+                scrollView.sizeDelta = temp;
+            }
+
+            objeto.gameObject.SetActive(true);
+        }
+        else if (actived && !active)
+        {
+            objeto.gameObject.SetActive(false);
+
+            {
+                var temp = scrollView.anchoredPosition;
+                temp.y += objeto.sizeDelta.y;
+
+                scrollView.anchoredPosition = temp;
+            }
+
+            {
+                var temp = scrollView.sizeDelta;
+                temp.y += objeto.sizeDelta.y;
+
+                scrollView.sizeDelta = temp;
+            }
+        }
+    }
 }

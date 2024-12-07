@@ -17,7 +17,7 @@ public class TwitterSystem : MonoBehaviour
 
     readonly LinkedList<Post> posts = new();
     
-    public float timeUpdateDatetime = 60f;
+    public float timeUpdateDatetime = 20f;
     private bool blockEndScroll;
     private float timeCD;
     private int newPosts;
@@ -33,13 +33,15 @@ public class TwitterSystem : MonoBehaviour
     {
         if (Time.time - timeCD > timeUpdateDatetime)
         {
-            conn.AtualizarPosts(this, posts.Count);
+            conn.AtualizarPosts(this);
             timeCD = Time.time;
         }
     }
 
     public int GetCountPosts() => posts.Count;
     public Post GetFirstPost() => posts.First.Value;
+    public Post GetLastPost() => posts.Last.Value;
+    public void CancelarUpdate() => conn.CancelarUpdate();
 
     public void ContaButton()
     {
@@ -70,17 +72,7 @@ public class TwitterSystem : MonoBehaviour
 
         for (int i = 0; i < json.Length; i++)
         {
-            int id = json[i].GetInt("id"),
-                total_likes = json[i].GetInt("total_likes"),
-                total_comments = json[i].GetInt("total_comments");
-            string user = json[i].GetString("user"),
-                   content = json[i].GetString("content");
-            DateTime data_pub = DateTime.Parse(json[i].GetString("data_pub")),
-                     horario = DateTime.Parse(json[i].GetString("horario")); ;
-            bool user_liked = json[i].GetInt("user_liked") == 1;
-
-            Post post = new(id, user, content, data_pub, horario, total_likes, total_comments, user_liked);
-            
+            Post post = Tools.ApiToPost(json[i]);
             posts.AddLast(post);
         }
 
@@ -114,18 +106,14 @@ public class TwitterSystem : MonoBehaviour
     public void CriarPost(string result)
     {
         JSON json = JSON.ParseString(Tools.Api2Json(result));
+        Post post = Tools.ApiToPost(json);
 
-        int id = json.GetInt("id"),
-                total_likes = json.GetInt("total_likes"),
-                total_comments = json.GetInt("total_comments");
-        string user = json.GetString("user"),
-               content = json.GetString("content");
-        DateTime data_pub = DateTime.Parse(json.GetString("data_pub")),
-                 horario = DateTime.Parse(json.GetString("horario"));
-        bool user_liked = json.GetInt("user_liked") == 1;
+        posts.AddFirst(post);
+        SetNewPostTela(post);
+    }
 
-        Post post = new(id, user, content, data_pub, horario, total_likes, total_comments, user_liked);
-
+    public void CriarPost(Post post)
+    {
         posts.AddFirst(post);
         SetNewPostTela(post);
     }
@@ -181,6 +169,8 @@ public class TwitterSystem : MonoBehaviour
         Post[] sArray = new Post[posts.Count];
         posts.CopyTo(sArray, 0);
 
+        List<int> list = new();
+
         for (int i = 0; i < json.Length; i++)
         {
             int id = json[i].GetInt("id"),
@@ -193,9 +183,14 @@ public class TwitterSystem : MonoBehaviour
                 if (sArray[j].ID == id)
                 {
                     sArray[j].UpdateInfos(total_likes, total_comments, user_liked, horario);
+                    list.Add(id);
                     break;
                 }
         }
+
+        for (int j = 0; j < sArray.Length; j++)
+            if (!list.Contains(sArray[j].ID))
+                sArray[j].Postagem.AutoDeletePost();
     }
 
     public void EndScroll(Vector2 position)

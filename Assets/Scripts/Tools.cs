@@ -1,3 +1,4 @@
+using Leguar.TotalJSON;
 using System;
 using System.Globalization;
 using UnityEngine;
@@ -149,5 +150,19 @@ public class Tools
         if (interval.TotalSeconds >= 0)
             return $"{interval.Seconds} s";
         return null;
+    }
+
+    public static Post ApiToPost(JSON item)
+    {
+        int id = item.GetInt("id"),
+                total_likes = item.GetInt("total_likes"),
+                total_comments = item.GetInt("total_comments");
+        string user = item.GetString("user"),
+               content = item.GetString("content");
+        DateTime data_pub = DateTime.Parse(item.GetString("data_pub")),
+                 horario = DateTime.Parse(item.GetString("horario")); ;
+        bool user_liked = item.GetInt("user_liked") == 1;
+
+        return new(id, user, content, data_pub, horario, total_likes, total_comments, user_liked);
     }
 }

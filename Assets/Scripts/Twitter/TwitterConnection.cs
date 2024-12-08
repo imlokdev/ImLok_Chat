@@ -36,10 +36,8 @@ public class TwitterConnection : MonoBehaviour
         else apiUrl = vercelURL;
     }
 
-    public void CancelarUpdate() => StopCoroutine(nameof(UpdateAllPosts));
-
     public void NewPost(TwitterSystem script, string content, Button button) => StartCoroutine(CreatePost(script, content, button));
-    public void Posts(TwitterSystem script) => StartCoroutine(GetPosts(script));
+    public void Posts(TwitterSystem script, Button btn) => StartCoroutine(GetPosts(script, btn));
     public void AtualizarPosts(TwitterSystem script) => StartCoroutine(UpdateAllPosts(script));
     public void DeletarPost(PopUpManager script, int id_post, Button[] buttons) => StartCoroutine(DeletePost(script, id_post, buttons));
 
@@ -190,6 +188,7 @@ public class TwitterConnection : MonoBehaviour
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id_user", AccountManager.instance.Conta.ID.ToString() },
+            { "id_newest_post", script.GetFirstPost().ID.ToString() },
             { "content", content },
             { "token_acess", AccountManager.instance.Conta.Token_acess }
         };
@@ -219,7 +218,7 @@ public class TwitterConnection : MonoBehaviour
         request.Dispose();
     }
 
-    IEnumerator GetPosts(TwitterSystem script)
+    IEnumerator GetPosts(TwitterSystem script, Button btn)
     {
         int id_user = AccountManager.instance.Conta.ID;
         string token_acess = AccountManager.instance.Conta.Token_acess;
@@ -234,6 +233,8 @@ public class TwitterConnection : MonoBehaviour
             sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
         else script.CriarPosts(request.downloadHandler.text);
+
+        btn.interactable = true;
 
         request.Dispose();
     }
@@ -321,8 +322,8 @@ public class TwitterConnection : MonoBehaviour
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id_user", id_user.ToString() },
-            { "id_first_post", script.GetFirstPost().ID.ToString() },
-            { "id_last_post", script.GetLastPost().ID.ToString() },
+            { "id_newest_post", script.GetFirstPost().ID.ToString() },
+            { "id_older_post", script.GetLastPost().ID.ToString() },
             { "token_acess", token_acess }
         };
         JSON json = new(dicio);

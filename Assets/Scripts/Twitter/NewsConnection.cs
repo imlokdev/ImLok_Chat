@@ -33,14 +33,14 @@ public class NewsConnection : MonoBehaviour
         else apiUrl = vercelURL;
     }
 
-    public void NewPosts(NewsSystem script, int id_first_post) => StartCoroutine(GetNewPosts(script, id_first_post));
+    public void NewPosts(NewsSystem script, int id_newest_post) => StartCoroutine(GetNewPosts(script, id_newest_post));
 
-    IEnumerator GetNewPosts(NewsSystem script, int id_first_post)
+    IEnumerator GetNewPosts(NewsSystem script, int id_newest_post)
     {
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id_user", AccountManager.instance.Conta.ID.ToString() },
-            { "id_first_post", id_first_post.ToString() },
+            { "id_newest_post", id_newest_post.ToString() },
             { "token_acess", AccountManager.instance.Conta.Token_acess }
         };
         JSON json = new(dicio);

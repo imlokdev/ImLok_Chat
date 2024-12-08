@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
+using System;
 
 public class NewsSystem : MonoBehaviour
 {
@@ -18,7 +19,7 @@ public class NewsSystem : MonoBehaviour
 
     public float timeUpdate = 15f;
     private float timeCD;
-    private bool actived;
+    private bool actived = false;
 
     private void Start()
     {
@@ -40,23 +41,25 @@ public class NewsSystem : MonoBehaviour
     {
         newPosts.Clear();
         JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
+        int postValidos = 0;
 
         for (int i = 0; i < json.Length; i++)
         {
             Post post = Tools.ApiToPost(json[i]);
+            if (twitterSystem.Contains(post)) continue;
             newPosts.AddLast(post);
+            postValidos++;
         }
 
-        if (json.Length > 0)
+        if (postValidos > 0)
         {
-            newPostsText.text = $"Mostrar {json.Length} posts";
+            newPostsText.text = $"Mostrar {postValidos} posts";
             MoveScrollView(true);
         }
     }
 
     public void NewButton()
     {
-        twitterSystem.CancelarUpdate();
         MoveScrollView(false);
 
         Post[] sArray = new Post[newPosts.Count];
@@ -65,6 +68,12 @@ public class NewsSystem : MonoBehaviour
         foreach (var item in sArray)
             twitterSystem.CriarPost(item);
 
+        newPosts.Clear();
+    }
+
+    public void CleanNewPosts()
+    {
+        MoveScrollView(false);
         newPosts.Clear();
     }
 
@@ -93,6 +102,8 @@ public class NewsSystem : MonoBehaviour
         else if (actived && !active)
         {
             objeto.gameObject.SetActive(false);
+
+            actived = active;
 
             {
                 var temp = scrollView.anchoredPosition;

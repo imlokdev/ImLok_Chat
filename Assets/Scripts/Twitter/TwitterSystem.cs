@@ -10,6 +10,8 @@ public class TwitterSystem : MonoBehaviour
 {
     TwitterConnection conn;
 
+    NewsSystem newsSystem;
+
     [SerializeField] GameObject infosConta, prefab_Post, main, comment, popUp;
     [SerializeField] RectTransform content, canvas;
     [SerializeField] InputField postInput;
@@ -25,23 +27,30 @@ public class TwitterSystem : MonoBehaviour
     private void Start()
     {
         conn = TwitterConnection.instance;
-        conn.Posts(this);
+        newsSystem = GetComponent<NewsSystem>();
+        postBtn.interactable = false;
+        conn.Posts(this, postBtn);
         timeCD = Time.time;
     }
 
     private void Update()
     {
-        if (Time.time - timeCD > timeUpdateDatetime)
+        if (posts.Count > 0 && Time.time - timeCD > timeUpdateDatetime)
         {
             conn.AtualizarPosts(this);
             timeCD = Time.time;
         }
+        else timeCD = Time.time;
     }
 
     public int GetCountPosts() => posts.Count;
-    public Post GetFirstPost() => posts.First.Value;
+    public Post GetFirstPost()
+    {
+        try { return posts.First.Value; }
+        catch { return new(0); }
+    }
     public Post GetLastPost() => posts.Last.Value;
-    public void CancelarUpdate() => conn.CancelarUpdate();
+    public bool Contains(Post post) => posts.Contains(post);
 
     public void ContaButton()
     {
@@ -77,6 +86,7 @@ public class TwitterSystem : MonoBehaviour
         }
 
         SetPostsTela();
+        postBtn.interactable = true;
     }
 
     private void SetPostsTela()
@@ -105,11 +115,17 @@ public class TwitterSystem : MonoBehaviour
 
     public void CriarPost(string result)
     {
-        JSON json = JSON.ParseString(Tools.Api2Json(result));
-        Post post = Tools.ApiToPost(json);
+        JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
 
-        posts.AddFirst(post);
-        SetNewPostTela(post);
+        foreach (var item in json)
+        {
+            Post post = Tools.ApiToPost(item);
+
+            posts.AddFirst(post);
+            SetNewPostTela(post);
+        }
+
+        newsSystem.CleanNewPosts();
     }
 
     public void CriarPost(Post post)
@@ -165,6 +181,8 @@ public class TwitterSystem : MonoBehaviour
     public void UpdateAllPosts(string result)
     {
         JSON[] json = JSON.ParseStringToMultiple(Tools.Api2Json(result));
+
+        if (json.Length != posts.Count) return;
 
         Post[] sArray = new Post[posts.Count];
         posts.CopyTo(sArray, 0);

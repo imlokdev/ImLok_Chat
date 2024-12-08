@@ -15,6 +15,8 @@ public class Post
     public Postagem Postagem { get; private set; }
     public LinkedList<Comment> Comments { get; private set; }
 
+    public Post (int id) => ID = id;
+
     public Post (int id, string user, string content, DateTime data_pub, DateTime horario, int total_likes, int total_comments, bool user_liked)
     {
         ID = id;

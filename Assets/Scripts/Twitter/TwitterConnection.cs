@@ -88,7 +88,7 @@ public class TwitterConnection : MonoBehaviour
         IDictionary dicio = new Dictionary<string, string>
         {
             { "id_user", AccountManager.instance.Conta.ID.ToString() },
-            { "id_post", id_comment.ToString() },
+            { "id_comment", id_comment.ToString() },
             { "token_acess", AccountManager.instance.Conta.Token_acess }
         };
         JSON json = new(dicio);
@@ -107,7 +107,7 @@ public class TwitterConnection : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Erro: " + request.downloadHandler.error);
+            Debug.LogError("Erro: " + request.downloadHandler.text);
             sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
         else script.DeletarComentario();
@@ -146,7 +146,7 @@ public class TwitterConnection : MonoBehaviour
             Debug.LogError("Erro: " + request.downloadHandler.error);
             sessionManager.FinalizarSessao(request.downloadHandler.text, request.responseCode);
         }
-        else script.CreateComment(request.downloadHandler.text);
+        else script.CreateComments(request.downloadHandler.text);
 
         button.interactable = true;
 

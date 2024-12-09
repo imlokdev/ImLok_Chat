@@ -5,18 +5,20 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Leguar.TotalJSON;
+using System.Xml.Linq;
 
 public class CommentManager : MonoBehaviour
 {
     TwitterConnection conn;
 
+    public PopUpManager popUpManager;
+
     Post postOpenned;
 
     [SerializeField] TwitterSystem twt;
     [SerializeField] Postagem postagem;
-    public PopUpManager popUpManager;
 
-    [SerializeField] GameObject main, commentTela, prefab_Comment;
+    [SerializeField] GameObject main, commentTela, prefab_Comment, delete;
     [SerializeField] Transform canvas;
 
     [SerializeField] InputField commentInput;
@@ -38,6 +40,10 @@ public class CommentManager : MonoBehaviour
 
         main.SetActive(false);
         commentTela.SetActive(true);
+
+        Conta conta = AccountManager.instance.Conta;
+        if (postOpenned.User == conta.User || conta.IsAdmin) delete.SetActive(true);
+        else delete.SetActive(false);
     }
 
     public void ComentarButton()
@@ -47,32 +53,6 @@ public class CommentManager : MonoBehaviour
         conn.NewComment(this, postOpenned.ID, commentInput.text, commentBtn);
         commentBtn.interactable = false;
         commentInput.text = null;
-    }
-
-    public void CreateComment(string result)
-    {
-        JSON json = JSON.ParseString(result);
-
-        int id = json.GetInt("id"),
-            id_post = json.GetInt("id_post");
-        string user = json.GetString("user"),
-               content = json.GetString("content");
-        DateTime data_pub = DateTime.Parse(json.GetString("data_pub")),
-                 horario = DateTime.Parse(json.GetString("horario"));
-
-        Comment comment = new(id, id_post, user, content, data_pub, horario);
-
-        if (!twt.ContainsInPost(id_post, comment))
-        {
-            twt.AddComment(this, id_post, comment, true);
-            var comments = twt.GetComments(id_post);
-            Comment[] sArray = new Comment[comments.Count];
-            comments.CopyTo(sArray, 0);
-            SetCommentInScreen(sArray, comment);
-        }
-
-        commentBtn.interactable = false;
-        postagem.Atualizar();
     }
 
     public void CreateComments(string result)
@@ -93,46 +73,32 @@ public class CommentManager : MonoBehaviour
             if (!twt.ContainsInPost(id_post, comment))
             {
                 twt.AddComment(this, id_post, comment);
-                SetCommentsInScreen(twt.GetComments(id_post));
+                SetCommentInScreen(comment, i, json.Length);
             }
         }
+
+        postagem.Atualizar();
     }
 
-    public void SetCommentInScreen(Comment[] comments, Comment comment)
+    public void SetCommentInScreen(Comment comment, int index, int resultLenght = 0)
     {
-        int totalPosts = comments.Length;
-        float tamanhoContent = totalPosts * 200f;
-        float posY = tamanhoContent / 2 - 100f;
+        var totalComments = postOpenned.Comments.Count;
+        var temp = Instantiate(prefab_Comment, canvas);
+        temp.transform.SetParent(content);
 
-        content.sizeDelta = new(0, tamanhoContent);
+        var classe = temp.GetComponent<Comentario>();
+        classe.SetInfos(comment);
 
-        for (int i = 0; i < totalPosts; i++)
-        {
-            if (comments[i].Equals(comment))
-            {
-                var temp = Instantiate(prefab_Comment, canvas);
-                temp.transform.SetParent(content);
-                temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
+        comment.SetClasse(classe);
 
-                var classe = temp.GetComponent<Comentario>();
-                classe.SetInfos(comment);
-
-                comment.SetClasse(classe);
-
-                if (totalPosts % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
-            }
-            else
-            {
-                RectTransform rect = comments[i].Comentario.GetComponent<RectTransform>();
-                rect.anchoredPosition = new(0, posY);
-            }
-
-            posY -= 200f;
-        }
+        if (resultLenght > 0) index = totalComments;
+        if (index % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
+        OrganizarCommentsTela();
     }
 
-    public void SetCommentsInScreen(LinkedList<Comment> comments)
+    public void OrganizarCommentsTela()
     {
+        var comments = postOpenned.Comments;
         int totalPosts = comments.Count;
         float tamanhoContent = totalPosts * 200f;
         float posY = tamanhoContent / 2 - 100f;
@@ -144,28 +110,12 @@ public class CommentManager : MonoBehaviour
 
         for (int i = 0; i < comments.Count; i++)
         {
-            if (i != totalPosts-1)
-            {
-                RectTransform rect = sArray[i].Comentario.GetComponent<RectTransform>();
-                rect.anchoredPosition = new(0, posY);
-                rect.gameObject.SetActive(true);
-            }
-            else
-            {
-                Comment comment = sArray[i];
-                var temp = Instantiate(prefab_Comment, canvas);
-                temp.transform.SetParent(content);
-                temp.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
-
-                var classe = temp.GetComponent<Comentario>();
-                classe.SetInfos(comment);
-
-                comment.SetClasse(classe);
-
-                if (i % 2 == 0) temp.GetComponent<Image>().color = Color.gray;
-            }
-
+            Comment post = sArray[i];
+            post.Comentario.GetComponent<RectTransform>().anchoredPosition = new(0, posY);
             posY -= 200f;
         }
+
+        commentBtn.interactable = true;
+        postagem.Atualizar();
     }
 }

@@ -28,7 +28,6 @@ public class PopUpManager : MonoBehaviour
 
     public void SetPost(Post post)
     {
-
         this.post = post;
         choice = Publi.Post;
         gameObject.SetActive(true);

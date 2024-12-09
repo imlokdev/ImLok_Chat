@@ -660,7 +660,6 @@ MonoBehaviour:
   likeBtn: {fileID: 6737897528506218818}
   likeVazio: {fileID: 21300000, guid: 44988fc917ca52242ad542ba0a44482c, type: 3}
   likePreenchido: {fileID: 21300000, guid: 43e709f0ca7807d4ea6f15d1bf56b76a, type: 3}
-  timeUpdateDatetime: 10
 --- !u!1 &7596020008569383770
 GameObject:
   m_ObjectHideFlags: 0

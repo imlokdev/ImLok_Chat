@@ -1615,12 +1615,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbe2d92c2d9cb954a80239ad4d1e704d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popUpManager: {fileID: 1140193489}
   twt: {fileID: 1587154804}
   postagem: {fileID: 1381467066}
-  popUpManager: {fileID: 1140193489}
   main: {fileID: 1377704090}
   commentTela: {fileID: 703548871}
   prefab_Comment: {fileID: 1571126878076347959, guid: 5816472ffb047cc4b9c1be7106dedffc, type: 3}
+  delete: {fileID: 1381467067}
   canvas: {fileID: 340297628}
   commentInput: {fileID: 506793725}
   commentBtn: {fileID: 792921545}
@@ -8883,6 +8884,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffd775dcd13c93443a64459007a8ffd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1381467067 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2933829672580339651, guid: e45455944dbba404dbf1efa7541059f8, type: 3}
+  m_PrefabInstance: {fileID: 1381467064}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1389040217
 GameObject:
   m_ObjectHideFlags: 0
@@ -10465,7 +10471,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1709645023}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.99999994
+  m_Size: 0.9831972
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -11909,7 +11915,7 @@ RectTransform:
   m_Father: {fileID: 1002867490}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.000000059604645}
+  m_AnchorMin: {x: 0, y: 0.016802788}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}

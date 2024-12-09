@@ -11,6 +11,7 @@ public class TwitterSystem : MonoBehaviour
     TwitterConnection conn;
 
     NewsSystem newsSystem;
+    CommentManager commentManager;
 
     [SerializeField] GameObject infosConta, prefab_Post, main, comment, popUp;
     [SerializeField] RectTransform content, canvas;
@@ -28,6 +29,8 @@ public class TwitterSystem : MonoBehaviour
     {
         conn = TwitterConnection.instance;
         newsSystem = GetComponent<NewsSystem>();
+        commentManager = FindFirstObjectByType<CommentManager>();
+
         postBtn.interactable = false;
         conn.Posts(this, postBtn);
         timeCD = Time.time;
@@ -239,8 +242,10 @@ public class TwitterSystem : MonoBehaviour
     public void DeletePost(Post post)
     {
         RecolorirPosts(posts.Find(post));
+
         posts.Remove(post);
         Destroy(post.Postagem.gameObject);
+
         OrganizarPostsTela();
 
         comment.SetActive(false);
@@ -257,7 +262,7 @@ public class TwitterSystem : MonoBehaviour
             {
                 RecolorirComments(item.Comments, item.Comments.Find(comment));
                 item.Comments.Remove(comment);
-                //OrganizarCommentsTela(item.Comments);
+                commentManager.OrganizarCommentsTela();
             }
 
         Destroy(comment.Comentario.gameObject);
@@ -270,7 +275,17 @@ public class TwitterSystem : MonoBehaviour
 
         foreach (var item in sArray)
             if (item.ID == id_post)
-                script.SetCommentsInScreen(item.Comments);
+            {
+                Comment[] sArray2 = new Comment[item.Comments.Count];
+                item.Comments.CopyTo(sArray2, 0);
+                int count = 0;
+
+                foreach (var item2 in sArray2)
+                {
+                    script.SetCommentInScreen(item2, count);
+                    count++;
+                }
+            }
     }
 
     public LinkedList<Comment> GetComments(int id_post)

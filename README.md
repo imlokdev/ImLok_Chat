@@ -9,7 +9,7 @@ O projeto tem como propósito explorar a criação de uma interface de chat func
 ## 🚀 Tecnologias Utilizadas
 
 ### 🎮 Unity
-- **Unity Engine** `202x.x.x` (substitua pela versão usada)
+- **Unity Engine** `2021.3.18f1`
 - **C#** para lógica de UI e requisições
 - **UnityWebRequest** para chamadas HTTP
 
@@ -22,7 +22,7 @@ O projeto tem como propósito explorar a criação de uma interface de chat func
   - Curtidas (reações)
 
 ### 📦 Bibliotecas auxiliares
-- `Newtonsoft.Json` ou `JsonUtility` (para manipulação de JSON, dependendo do que você usou)
+- `TotalJson`
 
 ## 🖥️ Funcionalidades da Unity
 
@@ -37,7 +37,7 @@ O projeto tem como propósito explorar a criação de uma interface de chat func
 
 Você pode testar a versão WebGL do **ImLok Chat** diretamente pelo Unity Play:
 
-👉 **[Clique aqui para testar no navegador]([https://play.unity.com/mg/your-link-aqui](https://play.unity.com/pt/games/ecef70bb-75bb-49fd-8cf0-d81da863381d/imlok-chat-14))**
+👉 **[Clique aqui para testar no navegador](https://play.unity.com/pt/games/ecef70bb-75bb-49fd-8cf0-d81da863381d/imlok-chat-14)**
 
 ## 🧑‍💻 Autor
 
